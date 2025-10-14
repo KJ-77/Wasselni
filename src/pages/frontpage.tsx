@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/tabs"
 import RotatingText from "@/components/ui/rotatingtext"
 
-export function TabsDemo() {
+export function Frontpage() {
   return (
     <div>
       <div className="flex items-center justify-center">
@@ -101,3 +101,5 @@ export function TabsDemo() {
     </div>
   )
 }
+
+export default Frontpage;
