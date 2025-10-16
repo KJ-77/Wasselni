@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Home: React.FC = () => {
+const Home= () => {
     return (
         <div
             style={{
@@ -20,7 +20,7 @@ const Home: React.FC = () => {
                     Welcome to the Home Page
                 </h1>
             </header>
-
+ 
             <main style={{ width: '100%', maxWidth: 960 }}>
                 <p>
                     This is the home page of your application. Replace this content with
