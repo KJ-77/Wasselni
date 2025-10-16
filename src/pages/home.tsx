@@ -1,17 +1,6 @@
-import React from 'react';
-
 const Home= () => {
     return (
         <div
-            style={{
-                minHeight: '100vh',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-                padding: '2rem',
-                boxSizing: 'border-box',
-            }}
             role="main"
             aria-labelledby="home-title"
         >
