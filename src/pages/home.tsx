@@ -1,21 +1,23 @@
+import homePic from '../assets/homeWallpaper/final.png';
 const Home= () => {
     return (
-        <div
-            role="main"
-            aria-labelledby="home-title"
-        >
-            <header style={{ width: '100%', maxWidth: 960, marginBottom: '2rem' }}>
-                <h1 id="home-title" style={{ margin: 0 }}>
-                    Welcome to the Home Page
-                </h1>
-            </header>
- 
-            <main style={{ width: '100%', maxWidth: 960 }}>
-                <p>
-                    This is the home page of your application. Replace this content with
-                    your actual home UI.
-                </p>
-            </main>
+        <div>
+            <div 
+                className='max-h-40 relative flex items-center justify-center w-full 
+                min-h-120 bg-cover bg-center bg-no-repeat'
+            style={{ backgroundImage: `url(${homePic})` }}
+            >
+                      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-black/50"></div>
+
+      {/* Foreground content */}
+      <div className="relative z-10 text-white text-center">
+        <h1 className="text-4xl font-bold mb-4">One Lebanon. One Route. One Ride.</h1>
+        <p className="text-lg">From the Mountains to the Sea — Ride Together..</p>
+      </div>
+
+
+           </div>
 
             <footer
                 style={{
