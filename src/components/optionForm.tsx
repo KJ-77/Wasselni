@@ -18,8 +18,8 @@ function OptionForm() {
 
   return (
     <div
-      className="flex items-center justify-between w-full max-w-[1500px]
-     bg-white rounded-full shadow-sm border border-gray-200 overflow-hidden"
+      className="flex items-center justify-between w-full max-w-[2000px]
+     bg-white rounded-[15px] shadow-sm border border-gray-200 overflow-hidden select-none"
     >
       <div
         className="flex items-center space-x-2 px-4 py-3
@@ -86,7 +86,7 @@ function OptionForm() {
       </div>
 
       {/* Search button */}
-      <button className="bg-sky-500 hover:bg-sky-600 text-white font-semibold text-sm px-6 py-3 rounded-r-full transition">
+      <button className="bg-green-900 hover:bg-green-950 text-white font-semibold text-sm px-6 py-3 rounded-r-[15px] transition">
         Search
       </button>
     </div>
