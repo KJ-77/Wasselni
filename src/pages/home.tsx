@@ -1,5 +1,6 @@
 import homePic from "../assets/homeWallpaper/final.png";
 import OptionForm from "@/components/optionForm";
+import Calendar from "@/components/ui/calendar";
 const Home = () => {
   return (
     <div>
@@ -25,6 +26,8 @@ const Home = () => {
         </div>
       </div>
 <OptionForm />
+<Calendar />
+      {/* Footer */}
       <footer
         style={{
           marginTop: "auto",
