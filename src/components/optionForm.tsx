@@ -7,11 +7,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Input } from "./ui/input";
 
 function OptionForm() {
   const [passengers, setPassengers] = React.useState(1);
-  const [openFrom, setOpenFrom] = React.useState(false);
-  const [openTo, setOpenTo] = React.useState(false);
+  // const [openFrom, setOpenFrom] = React.useState("");
+  // const [openTo, setOpenTo] = React.useState("");
   const [openDate, setOpenDate] = React.useState(false);
   const [openPassengers, setOpenPassengers] = React.useState(false);
   const [date, setDate] = React.useState<Date | undefined>(undefined);
@@ -24,59 +25,34 @@ function OptionForm() {
       className="flex items-center justify-between w-full max-w-[2000px]
       bg-white rounded-[15px] shadow-sm border border-gray-200 overflow-hidden select-none"
     >
+      {/* for alignment purposes */}
+      <div />
       {/* Leaving From */}
-      <Popover open={openFrom} onOpenChange={setOpenFrom}>
-        <PopoverTrigger asChild>
-          <div className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 transition text-sm font-medium text-gray-600 cursor-pointer">
-            <FaDotCircle className="text-gray-500" />
-            <input
-              type="text"
-              placeholder="Leaving from"
-              readOnly
-              className="outline-none bg-transparent text-gray-600 placeholder-gray-500"
-            />
-          </div>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto overflow-hidden p-0" align="start">
-          {/* Temporary Calendar for demonstration */}
-          <Calendar
-            mode="single"
-            selected={date}
-            onSelect={(d) => {
-              setDate(d);
-              setOpenFrom(false);
-            }}
-          />
-        </PopoverContent>
-      </Popover>
+
+      <div className="w-auto flex items-center justify-center px-4 py-2 hover:bg-gray-100 transition text-sm font-medium text-gray-600 ">
+        <FaDotCircle className="text-gray-500" />
+        <Input type="search" placeholder="Leaving from" className="shadow-none border-0 w-31 outline-none focus-visible:ring-0 focus-visible:ring-offset-0" style={{textAlign:"center"}} />
+        {/* <input
+          type="text"
+          placeholder="Leaving from"
+          className="outline-none bg-transparent text-gray-600 placeholder-gray-500"
+          style={{textAlign:"center"}}
+        /> */}
+      </div>
 
       <div className="h-6 border-l border-gray-300" />
 
       {/* Going To */}
-      <Popover open={openTo} onOpenChange={setOpenTo}>
-        <PopoverTrigger asChild>
-          <div className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 transition text-sm font-medium text-gray-600 cursor-pointer">
-            <FaDotCircle className="text-gray-500" />
-            <input
-              type="text"
-              placeholder="Going to"
-              readOnly
-              className="outline-none bg-transparent text-gray-600 placeholder-gray-500"
-            />
-          </div>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto overflow-hidden p-0" align="start">
-          {/* Temporary Calendar for demonstration */}
-          <Calendar
-            mode="single"
-            selected={date}
-            onSelect={(d) => {
-              setDate(d);
-              setOpenTo(false);
-            }}
-          />
-        </PopoverContent>
-      </Popover>
+
+      <div className=" flex items-center px-4 py-2 hover:bg-gray-100 transition text-sm font-medium text-gray-600 cursor-pointer">
+        <FaDotCircle className="text-gray-500" />
+        <Input type="search" placeholder="Going to" className="shadow-none border-0 w-25 outline-none focus-visible:ring-0 focus-visible:ring-offset-0" style={{textAlign:"center"}} />
+        {/* <input
+          type="text"
+          placeholder="Going to"
+          className="outline-none bg-transparent text-gray-600 placeholder-gray-500"
+        /> */}
+      </div>
 
       <div className="h-6 border-l border-gray-300" />
 
