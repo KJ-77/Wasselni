@@ -1,7 +1,8 @@
 import homePic from "../assets/homeWallpaper/final.png";
 import OptionForm from "@/components/optionForm";
-// import {Calendar} from "@/components/ui/calendar";
+
 const Home = () => {
+
   return (
     <div>
       <div
@@ -20,19 +21,15 @@ const Home = () => {
           <p className="text-lg">
             From the Mountains to the Sea — Ride Together..
           </p>
-        
-            
         </div>
 
-         <div className="absolute rounded-full top-[450px] left-1/2 transform -translate-x-1/2 w-11/12 max-w-6xl bg-white shadow-lg ring-1 ring-gray-100 p-2 max-w-full">
+        <div className="absolute rounded-full top-[450px] left-1/2 transform -translate-x-1/2 w-11/12 max-w-6xl bg-white shadow-lg ring-1 ring-gray-100 p-2 max-w-full">
           <OptionForm />
-          </div>
-
+        </div>
       </div>
 
-      
-
       {/* <Calendar /> */}
+
       {/* Footer */}
       <footer
         style={{

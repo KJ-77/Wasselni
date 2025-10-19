@@ -1,9 +1,18 @@
-import { useState } from "react";
+import * as React from "react"
 import { FaUser, FaCalendarAlt, FaDotCircle } from "react-icons/fa";
+import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 
 function OptionForm() {
-  const [passengers, setPassengers] = useState(1);
-  const [open, setOpen] = useState(false);
+  const [passengers, setPassengers] = React.useState(1);
+  const [openDate, setOpenDate] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
+  const [date, setDate] = React.useState<Date | undefined>(undefined)
 
   const increment = () => {
     setPassengers(passengers + 1);
@@ -45,15 +54,35 @@ function OptionForm() {
       <div className="h-6 border-l border-gray-300" />
 
       {/* date */}
-      <div
-        className="flex items-center space-x-2 px-4 py-3
-       hover:bg-gray-100 transition"
-        onClick={() => setOpen(!open)}
-      >
-        <FaCalendarAlt className="text-gray-500" />
-        <span className="text-sm font-medium text-gray-600">Select date</span>
-      </div>
-      <div className="h-6 border-l border-gray-300" />
+      <div className="flex flex-col gap-3 items-center space-x-2 px-4 py-2
+       hover:bg-gray-100 transition">
+      <Popover open={openDate} onOpenChange={setOpenDate}>
+        
+        <PopoverTrigger asChild>
+          <Button
+            variant="ghost"
+            id="date"
+            className="w-26 justify-between text-sm font-medium text-gray-600"
+          >
+            <FaCalendarAlt className="text-gray-500" />
+            {date ? date.toLocaleDateString() : "Select date"}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+          <Calendar
+            mode="single"
+            selected={date}
+            captionLayout="dropdown"
+            onSelect={(date) => {
+              setDate(date)
+              setOpen(false)
+            }}
+          />
+        </PopoverContent>
+      </Popover>
+    </div>
+
+    <div className="h-6 border-l border-gray-300" />
 
       {/* passengers */}
       <div
