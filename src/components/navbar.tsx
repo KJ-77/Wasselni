@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 
 import logo from '../assets/logo/wasselni_logo_transparent.png';
+import { ModeToggle} from './mode-toggle';
 import { CircleUserRound, Search, BadgePlus, Bus, Car } from 'lucide-react';
 
 const Navbar = () => {
@@ -27,6 +28,7 @@ const linkClass = ({ isActive }: { isActive: boolean }) =>
             <Bus className="inline-block mr-1 " size={28} />
               Bus
             </NavLink>
+          <ModeToggle />
 
           </div>
 
