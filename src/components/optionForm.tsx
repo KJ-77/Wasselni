@@ -1,13 +1,22 @@
 import * as React from "react";
 import { FaUser, FaCalendarAlt, FaDotCircle } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import {
+  MiniCalendar,
+  MiniCalendarDay,
+  MiniCalendarDays,
+  MiniCalendarNavigation,
+} from '@/components/ui/shadcn-io/mini-calendar/index';
+import { useState } from 'react';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Input } from "./ui/input";
+import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react';
+
+
 
 function OptionForm() {
   const [passengers, setPassengers] = React.useState(1);
@@ -15,10 +24,15 @@ function OptionForm() {
   // const [openTo, setOpenTo] = React.useState("");
   const [openDate, setOpenDate] = React.useState(false);
   const [openPassengers, setOpenPassengers] = React.useState(false);
-  const [date, setDate] = React.useState<Date | undefined>(undefined);
+  // const [date, setDate] = React.useState<Date | undefined>(undefined);
 
   const increment = () => setPassengers((p) => p + 1);
   const decrement = () => setPassengers((p) => (p > 1 ? p - 1 : 1));
+
+
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const date = selectedDate;
+
 
   return (
     <div
@@ -69,15 +83,34 @@ function OptionForm() {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto overflow-hidden p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={date}
-            captionLayout="dropdown"
-            onSelect={(d) => {
-              setDate(d);
-              setOpenDate(false);
-            }}
-          />
+          <div className="space-y-4">
+      <MiniCalendar onValueChange={setSelectedDate} value={selectedDate}>
+        <MiniCalendarNavigation asChild direction="prev">
+        <Button size="icon" variant="outline">
+          <ArrowLeftIcon className="size-4" />
+        </Button>
+      </MiniCalendarNavigation>
+        <MiniCalendarDays>
+          {(date) => <MiniCalendarDay date={date} key={date.toISOString()} />}
+        </MiniCalendarDays>
+         <MiniCalendarNavigation asChild direction="next">
+        <Button size="icon" variant="outline">
+          <ArrowRightIcon className="size-4" />
+        </Button>
+      </MiniCalendarNavigation>
+      </MiniCalendar>
+      {selectedDate && (
+        <p className="text-muted-foreground text-sm">
+          Selected:{' '}
+          {selectedDate.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}
+        </p>
+      )}
+    </div>
         </PopoverContent>
       </Popover>
 
