@@ -24,7 +24,7 @@ const linkClass = ({ isActive }: { isActive: boolean }) =>
             <Car className="inline-block mr-1 " size={28} />
               Carpool
             </NavLink>
-            <NavLink to="/Frontpage" className={linkClass}>
+            <NavLink to="/Bus" className={linkClass}>
             <Bus className="inline-block mr-1 " size={28} />
               Bus
             </NavLink>
@@ -50,7 +50,7 @@ const linkClass = ({ isActive }: { isActive: boolean }) =>
             <BadgePlus className="inline-block mr-1 " size={28} />
               Publish a ride
             </NavLink>            
-            <NavLink to="/Account" className={linkClass }>
+            <NavLink to="/frontpage" className={linkClass }>
               <CircleUserRound className="inline-block " size={30} />
            
             </NavLink>
