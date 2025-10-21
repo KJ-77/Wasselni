@@ -29,19 +29,7 @@ const Home = () => {
       </div>
 
       {/* <Calendar /> */}
-
-      {/* Footer */}
-      <footer
-        style={{
-          marginTop: "auto",
-          width: "100%",
-          maxWidth: 960,
-          paddingTop: "2rem",
-          borderTop: "1px solid #eee",
-        }}
-      >
-        <small>© {new Date().getFullYear()} My App</small>
-      </footer>
+      
     </div>
   );
 };
