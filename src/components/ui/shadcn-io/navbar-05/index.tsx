@@ -1,7 +1,10 @@
 import * as React from "react";
 import { useEffect, useState, useRef } from "react";
-import { BellIcon, HelpCircleIcon, ChevronDownIcon } from "lucide-react";
+import {  HelpCircleIcon, ChevronDownIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import WasselniLogo from "@/assets/logo/wasselni_logo_transparent.png";
+
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -22,7 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+
 import { cn } from "@/lib/utils";
 
 import { ModeToggle } from "@/components/mode-toggle";
@@ -252,11 +255,11 @@ export interface Navbar05Props extends React.HTMLAttributes<HTMLElement> {
   onUserItemClick?: (item: string) => void;
 }
 
-// Default navigation links
+// Default navigation links (match routes defined in App.tsx)
 const defaultNavigationLinks: Navbar05NavItem[] = [
-  { href: "#", label: "Home" },
-  { href: "#", label: "Features" },
-  { href: "#", label: "Pricing" },
+  { href: "/", label: "Home" },
+  { href: "/frontpage", label: "Features" },
+  { href: "/Bus", label: "Pricing" },
   { href: "#", label: "About" },
 ];
 
@@ -264,7 +267,8 @@ export const Navbar05 = React.forwardRef<HTMLElement, Navbar05Props>(
   (
     {
       className,
-      logo = <Logo />,
+  logo = <Logo />,
+  logoHref = "/",
       navigationLinks = defaultNavigationLinks,
       userName = "John Doe",
       userEmail = "john@example.com",
@@ -323,7 +327,15 @@ export const Navbar05 = React.forwardRef<HTMLElement, Navbar05Props>(
         )}
         {...props}
       >
-        <div className="container mx-auto flex h-16 max-w-screen-2xl items-center justify-between gap-4">
+        <div className="relative">
+          {/* Centered logo (absolute) - fills header area so it's perfectly centered on mobile and desktop */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <Link to={logoHref} onClick={() => onNavItemClick?.(logoHref)} className="pointer-events-auto">
+              <img src={WasselniLogo} alt="Wasselni Logo" className="h-95 w-auto" />
+            </Link>
+          </div>
+
+          <div className="container mx-auto flex h-16 max-w-screen-2xl items-center justify-between gap-4">
           {/* Left side */}
           <div className="flex items-center gap-2">
             {/* Mobile menu trigger */}
@@ -343,16 +355,13 @@ export const Navbar05 = React.forwardRef<HTMLElement, Navbar05Props>(
                     <NavigationMenuList className="flex-col items-start gap-0">
                       {navigationLinks.map((link, index) => (
                         <NavigationMenuItem key={index} className="w-full">
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              if (onNavItemClick && link.href)
-                                onNavItemClick(link.href);
-                            }}
+                          <Link
+                            to={link.href || "/"}
+                            onClick={() => onNavItemClick?.(link.href || "")}
                             className="flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground cursor-pointer no-underline"
                           >
                             {link.label}
-                          </button>
+                          </Link>
                         </NavigationMenuItem>
                       ))}
                     </NavigationMenuList>
@@ -362,31 +371,21 @@ export const Navbar05 = React.forwardRef<HTMLElement, Navbar05Props>(
             )}
             {/* Main nav */}
             <div className="flex items-center gap-6">
-              <button
-                onClick={(e) => e.preventDefault()}
-                className="flex items-center space-x-2 text-primary hover:text-primary/90 transition-colors cursor-pointer"
-              >
-                <div className="text-2xl">{logo}</div>
-                <span className="hidden font-bold text-xl sm:inline-block">
-                  Wasselni
-                </span>
-              </button>
+              {/* left-side placeholder removed; logo is centered above */}
               {/* Navigation menu */}
               {!isMobile && (
                 <NavigationMenu className="flex">
                   <NavigationMenuList className="gap-1">
                     {navigationLinks.map((link, index) => (
                       <NavigationMenuItem key={index}>
-                        <NavigationMenuLink
-                          href={link.href}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            if (onNavItemClick && link.href)
-                              onNavItemClick(link.href);
-                          }}
-                          className="text-muted-foreground hover:text-primary font-medium transition-colors cursor-pointer group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50"
-                        >
-                          {link.label}
+                        <NavigationMenuLink asChild>
+                          <Link
+                            to={link.href || "/"}
+                            onClick={() => onNavItemClick?.(link.href || "")}
+                            className="text-muted-foreground hover:text-primary font-medium transition-colors cursor-pointer group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+                          >
+                            {link.label}
+                          </Link>
                         </NavigationMenuLink>
                       </NavigationMenuItem>
                     ))}
@@ -417,6 +416,7 @@ export const Navbar05 = React.forwardRef<HTMLElement, Navbar05Props>(
               onItemClick={onUserItemClick}
             />
           </div>
+        </div>
         </div>
       </header>
     );
