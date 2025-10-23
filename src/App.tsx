@@ -4,14 +4,14 @@ import Home from "./pages/home";
 import Bus from "./pages/bus";
 // import Navbar from "./components/navbar";
 import { ThemeProvider } from "@/components/theme-provider"
-import { Navbar05 } from "@/components/ui/shadcn-io/navbar-05/index"; 
+import { Navbar02 } from "@/components/ui/shadcn-io/navbar-02/index"; 
 
 
 const App = () => {
   return (
     <Router>
       <ThemeProvider>
-         <Navbar05 />
+         <Navbar02 />
         <Routes>
           
           <Route path="/" element= {<Home />} />
