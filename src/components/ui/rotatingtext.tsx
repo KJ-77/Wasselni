@@ -9,11 +9,12 @@ import React, {
 import {
   motion,
   AnimatePresence,
+} from "framer-motion";
+import type {
   Transition,
-  type VariantLabels,
-  type Target,
-  type AnimationControls,
-  type TargetAndTransition,
+  VariantLabels,
+  Target,
+  TargetAndTransition,
 } from "framer-motion";
 
 function cn(...classes: (string | undefined | null | boolean)[]): string {
@@ -35,7 +36,7 @@ export interface RotatingTextProps
   texts: string[];
   transition?: Transition;
   initial?: boolean | Target | VariantLabels;
-  animate?: boolean | VariantLabels | AnimationControls | TargetAndTransition;
+  animate?: boolean | VariantLabels | TargetAndTransition;
   exit?: Target | VariantLabels;
   animatePresenceMode?: "sync" | "wait";
   animatePresenceInitial?: boolean;

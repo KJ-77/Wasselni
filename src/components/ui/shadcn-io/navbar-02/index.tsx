@@ -117,7 +117,7 @@ export interface Navbar02Props extends React.HTMLAttributes<HTMLElement> {
 
 // Default navigation links
 const defaultNavigationLinks: Navbar02NavItem[] = [
-  { href: "/fronpage", label: "Home" },
+  { href: "/", label: "Home" },
   {
     label: "Features",
     submenu: true,
@@ -324,7 +324,7 @@ export const Navbar02 = React.forwardRef<HTMLElement, Navbar02Props>(
               >
                 <div className="text-2xl">{logo}</div>
                 <span className="hidden font-bold text-xl sm:inline-block">
-                  shadcn.io
+                  WASSELNI
                 </span>
               </Link>
               {/* Navigation menu */}
@@ -347,7 +347,7 @@ export const Navbar02 = React.forwardRef<HTMLElement, Navbar02Props>(
                                     <NavigationMenuLink asChild>
                                       <button className="flex h-full w-full select-none flex-col justify-center items-center text-center rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md cursor-pointer">
                                         <div className="mb-3 text-xl font-medium">
-                                          shadcn.io
+                                          WASSELNI
                                         </div>
                                         <p className="text-sm leading-tight text-muted-foreground">
                                           Beautifully designed components built

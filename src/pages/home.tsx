@@ -1,5 +1,6 @@
 import homePic from "../assets/homeWallpaper/final.png";
 import OptionForm from "@/components/optionForm";
+import { Carousel } from "@/components/carousel";
 
 const Home = () => {
 
@@ -27,7 +28,45 @@ const Home = () => {
           <OptionForm />
         </div>
       </div>
+      {/* div for positioning */}
+      <div className="h-5 md:h-28 lg:h-32" aria-hidden="true"></div>
 
+      {/* Carousel section */}
+      <div className="mb-20 flex flex-wrap items-center justify-center gap-8">
+        <div className="w-[400px] h-[420px] flex justify-center">
+          <Carousel
+            baseWidth={400}
+            autoplay={true}
+            autoplayDelay={2500}
+            pauseOnHover={true}
+            loop={true}
+            round={false}
+          />
+        </div>
+
+        <div className="w-[400px] h-[420px] flex justify-center">
+          <Carousel
+            baseWidth={400}
+            autoplay={true}
+            autoplayDelay={2500}
+            pauseOnHover={true}
+            loop={true}
+            round={false}
+          />
+        </div>
+
+        <div className="w-[400px] h-[420px] flex justify-center">
+          <Carousel
+            baseWidth={400}
+            autoplay={true}
+            autoplayDelay={2500}
+            pauseOnHover={true}
+            loop={true}
+            round={false}
+          />
+        </div>
+      </div>
+      
       {/* <Calendar /> */}
       
     </div>
