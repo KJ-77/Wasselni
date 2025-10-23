@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import { useEffect, useState, useRef } from "react";
 import { BookOpenIcon, InfoIcon, LifeBuoyIcon } from "lucide-react";
@@ -21,6 +19,7 @@ import {
 import { cn } from "@/lib/utils";
 import type {} from "react";
 import { Link } from "react-router-dom";
+import { ModeToggle } from "@/components/mode-toggle";
 
 // Simple logo component for the navbar
 const Logo = (props: React.SVGAttributes<SVGElement>) => {
@@ -125,30 +124,28 @@ const defaultNavigationLinks: Navbar02NavItem[] = [
     items: [
       {
         href: "/frontpage",
-        label: "Components",
-        description: "Browse all components in the library.",
+        label: "Real-Time Bus Tracker",
+        description: "Track your bus live and never miss a ride again!",
       },
       {
-        href: "#documentation",
-        label: "Documentation",
-        description: "Learn how to use the library.",
+        href: "/carpoolOptions",
+        label: "Smart Carpooling",
+        description: "Connect with nearby commuters and split costs instantly.",
       },
       {
-        href: "#templates",
-        label: "Templates",
-        description: "Pre-built layouts for common use cases.",
+        href: "/TouristicRides",
+        label: "Discover Lebanon",
+        description: "Explore Lebanon's hidden gems with our curated trips.",
       },
     ],
   },
   {
-    label: "Pricing",
+    label: "Start Your Journey",
     submenu: true,
     type: "simple",
     items: [
-      { href: "#product-a", label: "Product A" },
-      { href: "#product-b", label: "Product B" },
-      { href: "#product-c", label: "Product C" },
-      { href: "#product-d", label: "Product D" },
+      { href: "#product-a", label: "Catch a Bus" },
+      { href: "#product-b", label: "Join a Carpool" },
     ],
   },
   {
@@ -158,11 +155,11 @@ const defaultNavigationLinks: Navbar02NavItem[] = [
     items: [
       {
         href: "#getting-started",
-        label: "Getting Started",
+        label: "Quick Start Guide",
         icon: "BookOpenIcon",
       },
-      { href: "#tutorials", label: "Tutorials", icon: "LifeBuoyIcon" },
-      { href: "#about-us", label: "About Us", icon: "InfoIcon" },
+      { href: "#tutorials", label: "How It Works", icon: "LifeBuoyIcon" },
+      { href: "#about-us", label: "Our Story", icon: "InfoIcon" },
     ],
   },
 ];
@@ -350,8 +347,8 @@ export const Navbar02 = React.forwardRef<HTMLElement, Navbar02Props>(
                                           WASSELNI
                                         </div>
                                         <p className="text-sm leading-tight text-muted-foreground">
-                                          Beautifully designed components built
-                                          with Radix UI and Tailwind CSS.
+                                          Whether you’re commuting to work or exploring a new city, Wasselni helps you track buses, 
+                                          find rides, and travel together — safely, easily, and affordably.
                                         </p>
                                       </button>
                                     </NavigationMenuLink>
@@ -465,6 +462,7 @@ export const Navbar02 = React.forwardRef<HTMLElement, Navbar02Props>(
           </div>
           {/* Right side sign in*/}
           <div className="flex items-center gap-3">
+          <ModeToggle />
             <Button
               variant="ghost"
               size="sm"

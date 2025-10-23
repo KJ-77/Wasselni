@@ -15,6 +15,11 @@ import {
 } from "@/components/ui/popover";
 import { Input } from "./ui/input";
 import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group"
 
 
 
@@ -44,9 +49,13 @@ function OptionForm() {
       {/* Leaving From */}
 
       <div className="w-auto flex items-center justify-center px-4 py-2 hover:bg-gray-100 transition text-sm font-medium text-gray-600 ">
-        <FaDotCircle className="text-gray-500" />
-        <Input type="search" placeholder="Leaving from" className="shadow-none border-0 w-31 outline-none focus-visible:ring-0 focus-visible:ring-offset-0" style={{textAlign:"center"}} />
-        {/* <input
+        
+        <InputGroup>
+        <InputGroupInput placeholder="Leaving from" />
+        <InputGroupAddon>
+          <FaDotCircle className="text-gray-500" />
+        </InputGroupAddon>
+      </InputGroup>{/* <input
           type="text"
           placeholder="Leaving from"
           className="outline-none bg-transparent text-gray-600 placeholder-gray-500"
@@ -60,7 +69,7 @@ function OptionForm() {
 
       <div className=" flex items-center px-4 py-2 hover:bg-gray-100 transition text-sm font-medium text-gray-600 cursor-pointer">
         <FaDotCircle className="text-gray-500" />
-        <Input type="search" placeholder="Going to" className="shadow-none border-0 w-25 outline-none focus-visible:ring-0 focus-visible:ring-offset-0" style={{textAlign:"center"}} />
+        <Input type="search" placeholder="Going to" className="shadow-none border-0 w-60 outline-none focus-visible:ring-0 focus-visible:ring-offset-0" style={{textAlign:"center"}} />
         {/* <input
           type="text"
           placeholder="Going to"
