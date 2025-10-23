@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { useEffect, useState, useRef } from 'react';
-import { BookOpenIcon, InfoIcon, LifeBuoyIcon } from 'lucide-react';
+import * as React from "react";
+import { useEffect, useState, useRef } from "react";
+import { BookOpenIcon, InfoIcon, LifeBuoyIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
@@ -17,40 +17,51 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from  "@/components/ui/popover";
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import type {  } from 'react';
+import type {} from "react";
+import { Link } from "react-router-dom";
 
 // Simple logo component for the navbar
 const Logo = (props: React.SVGAttributes<SVGElement>) => {
   return (
-    <svg width='1em' height='1em' viewBox='0 0 324 323' fill='currentColor' xmlns='http://www.w3.org/2000/svg' {...props}>
+    <svg
+      width="1em"
+      height="1em"
+      viewBox="0 0 324 323"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
       <rect
-        x='88.1023'
-        y='144.792'
-        width='151.802'
-        height='36.5788'
-        rx='18.2894'
-        transform='rotate(-38.5799 88.1023 144.792)'
-        fill='currentColor'
+        x="88.1023"
+        y="144.792"
+        width="151.802"
+        height="36.5788"
+        rx="18.2894"
+        transform="rotate(-38.5799 88.1023 144.792)"
+        fill="currentColor"
       />
       <rect
-        x='85.3459'
-        y='244.537'
-        width='151.802'
-        height='36.5788'
-        rx='18.2894'
-        transform='rotate(-38.5799 85.3459 244.537)'
-        fill='currentColor'
+        x="85.3459"
+        y="244.537"
+        width="151.802"
+        height="36.5788"
+        rx="18.2894"
+        transform="rotate(-38.5799 85.3459 244.537)"
+        fill="currentColor"
       />
     </svg>
   );
 };
 
 // Hamburger icon component
-const HamburgerIcon = ({ className, ...props }: React.SVGAttributes<SVGElement>) => (
+const HamburgerIcon = ({
+  className,
+  ...props
+}: React.SVGAttributes<SVGElement>) => (
   <svg
-    className={cn('pointer-events-none', className)}
+    className={cn("pointer-events-none", className)}
     width={16}
     height={16}
     viewBox="0 0 24 24"
@@ -82,9 +93,9 @@ export interface Navbar02NavItem {
   href?: string;
   label: string;
   submenu?: boolean;
-  type?: 'description' | 'simple' | 'icon';
+  type?: "description" | "simple" | "icon";
   items?: Array<{
-    href: string;
+    href: string; //href for navigation
     label: string;
     description?: string;
     icon?: string;
@@ -99,54 +110,59 @@ export interface Navbar02Props extends React.HTMLAttributes<HTMLElement> {
   signInHref?: string;
   ctaText?: string;
   ctaHref?: string;
+  onNavItemClick?: (href: string) => void;
   onSignInClick?: () => void;
   onCtaClick?: () => void;
 }
 
 // Default navigation links
 const defaultNavigationLinks: Navbar02NavItem[] = [
-  { href: '#', label: 'Home' },
+  { href: "/fronpage", label: "Home" },
   {
-    label: 'Features',
+    label: "Features",
     submenu: true,
-    type: 'description',
+    type: "description",
     items: [
       {
-        href: '#components',
-        label: 'Components',
-        description: 'Browse all components in the library.',
+        href: "/frontpage",
+        label: "Components",
+        description: "Browse all components in the library.",
       },
       {
-        href: '#documentation',
-        label: 'Documentation',
-        description: 'Learn how to use the library.',
+        href: "#documentation",
+        label: "Documentation",
+        description: "Learn how to use the library.",
       },
       {
-        href: '#templates',
-        label: 'Templates',
-        description: 'Pre-built layouts for common use cases.',
+        href: "#templates",
+        label: "Templates",
+        description: "Pre-built layouts for common use cases.",
       },
     ],
   },
   {
-    label: 'Pricing',
+    label: "Pricing",
     submenu: true,
-    type: 'simple',
+    type: "simple",
     items: [
-      { href: '#product-a', label: 'Product A' },
-      { href: '#product-b', label: 'Product B' },
-      { href: '#product-c', label: 'Product C' },
-      { href: '#product-d', label: 'Product D' },
+      { href: "#product-a", label: "Product A" },
+      { href: "#product-b", label: "Product B" },
+      { href: "#product-c", label: "Product C" },
+      { href: "#product-d", label: "Product D" },
     ],
   },
   {
-    label: 'About',
+    label: "About",
     submenu: true,
-    type: 'icon',
+    type: "icon",
     items: [
-      { href: '#getting-started', label: 'Getting Started', icon: 'BookOpenIcon' },
-      { href: '#tutorials', label: 'Tutorials', icon: 'LifeBuoyIcon' },
-      { href: '#about-us', label: 'About Us', icon: 'InfoIcon' },
+      {
+        href: "#getting-started",
+        label: "Getting Started",
+        icon: "BookOpenIcon",
+      },
+      { href: "#tutorials", label: "Tutorials", icon: "LifeBuoyIcon" },
+      { href: "#about-us", label: "About Us", icon: "InfoIcon" },
     ],
   },
 ];
@@ -156,12 +172,13 @@ export const Navbar02 = React.forwardRef<HTMLElement, Navbar02Props>(
     {
       className,
       logo = <Logo />,
-      logoHref = '#',
+      logoHref = "/",
       navigationLinks = defaultNavigationLinks,
-      signInText = 'Sign In',
-      signInHref = '#signin',
-      ctaText = 'Get Started',
-      ctaHref = '#get-started',
+      signInText = "Sign In",
+      signInHref = "#signin",
+      ctaText = "Get Started",
+      ctaHref = "#get-started",
+      onNavItemClick,
       onSignInClick,
       onCtaClick,
       ...props
@@ -192,14 +209,17 @@ export const Navbar02 = React.forwardRef<HTMLElement, Navbar02Props>(
     }, []);
 
     // Combine refs
-    const combinedRef = React.useCallback((node: HTMLElement | null) => {
-      containerRef.current = node;
-      if (typeof ref === 'function') {
-        ref(node);
-      } else if (ref) {
-        ref.current = node;
-      }
-    }, [ref]);
+    const combinedRef = React.useCallback(
+      (node: HTMLElement | null) => {
+        containerRef.current = node;
+        if (typeof ref === "function") {
+          ref(node);
+        } else if (ref) {
+          ref.current = node;
+        }
+      },
+      [ref]
+    );
 
     // const renderIcon = (iconName: string) => {
     //   switch (iconName) {
@@ -218,7 +238,7 @@ export const Navbar02 = React.forwardRef<HTMLElement, Navbar02Props>(
       <header
         ref={combinedRef}
         className={cn(
-          'sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-6 [&_*]:no-underline',
+          "sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-6 [&_*]:no-underline",
           className
         )}
         {...props}
@@ -251,31 +271,38 @@ export const Navbar02 = React.forwardRef<HTMLElement, Navbar02Props>(
                               <ul>
                                 {link.items?.map((item, itemIndex) => (
                                   <li key={itemIndex}>
-                                    <button
-                                      onClick={(e) => e.preventDefault()}
+                                    <Link
+                                      to={item.href}
+                                      onClick={() =>
+                                        onNavItemClick?.(item.href)
+                                      }
                                       className="flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground cursor-pointer no-underline"
                                     >
                                       {item.label}
-                                    </button>
+                                    </Link>
                                   </li>
                                 ))}
                               </ul>
                             </>
                           ) : (
-                            <button
-                              onClick={(e) => e.preventDefault()}
+                            <Link
+                              to={link.href!}
+                              onClick={() => onNavItemClick?.(link.href!)}
                               className="flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground cursor-pointer no-underline"
                             >
                               {link.label}
-                            </button>
+                            </Link>
                           )}
                           {/* Add separator between different types of items */}
                           {index < navigationLinks.length - 1 &&
-                            ((!link.submenu && navigationLinks[index + 1].submenu) ||
-                              (link.submenu && !navigationLinks[index + 1].submenu) ||
+                            ((!link.submenu &&
+                              navigationLinks[index + 1].submenu) ||
+                              (link.submenu &&
+                                !navigationLinks[index + 1].submenu) ||
                               (link.submenu &&
                                 navigationLinks[index + 1].submenu &&
-                                link.type !== navigationLinks[index + 1].type)) && (
+                                link.type !==
+                                  navigationLinks[index + 1].type)) && (
                               <div
                                 role="separator"
                                 aria-orientation="horizontal"
@@ -291,115 +318,152 @@ export const Navbar02 = React.forwardRef<HTMLElement, Navbar02Props>(
             )}
             {/* Main nav */}
             <div className="flex items-center gap-6">
-              <button 
-                onClick={(e) => e.preventDefault()}
+              <Link
+                to={logoHref}
                 className="flex items-center space-x-2 text-primary hover:text-primary/90 transition-colors cursor-pointer"
               >
-                <div className="text-2xl">
-                  {logo}
-                </div>
-                <span className="hidden font-bold text-xl sm:inline-block">shadcn.io</span>
-              </button>
+                <div className="text-2xl">{logo}</div>
+                <span className="hidden font-bold text-xl sm:inline-block">
+                  shadcn.io
+                </span>
+              </Link>
               {/* Navigation menu */}
               {!isMobile && (
                 <NavigationMenu className="flex">
                   <NavigationMenuList className="gap-1">
-                {navigationLinks.map((link, index) => (
-                  <NavigationMenuItem key={index}>
-                    {link.submenu ? (
-                      <>
-                        <NavigationMenuTrigger>
-                          {link.label}
-                        </NavigationMenuTrigger>
-                        <NavigationMenuContent>
-                          {link.type === 'description' && link.label === 'Features' ? (
-                            <div className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
-                              <div className="row-span-3">
-                                <NavigationMenuLink asChild>
-                                  <button
-                                    onClick={(e) => e.preventDefault()}
-                                    className="flex h-full w-full select-none flex-col justify-center items-center text-center rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md cursor-pointer"
-                                  >
-                                    <div className="mb-3 text-xl font-medium">
-                                      shadcn.io
-                                    </div>
-                                    <p className="text-sm leading-tight text-muted-foreground">
-                                      Beautifully designed components built with Radix UI and Tailwind CSS.
-                                    </p>
-                                  </button>
-                                </NavigationMenuLink>
-                              </div>
-                              {link.items?.map((item, itemIndex) => (
-                                <ListItem
-                                  key={itemIndex}
-                                  title={item.label}
-                                  href={item.href}
-                                  type={link.type}
-                                >
-                                  {item.description}
-                                </ListItem>
-                              ))}
-                            </div>
-                          ) : link.type === 'simple' ? (
-                            <div className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                              {link.items?.map((item, itemIndex) => (
-                                <ListItem
-                                  key={itemIndex}
-                                  title={item.label}
-                                  href={item.href}
-                                  type={link.type}
-                                >
-                                  {item.description}
-                                </ListItem>
-                              ))}
-                            </div>
-                          ) : link.type === 'icon' ? (
-                            <div className="grid w-[400px] gap-3 p-4">
-                              {link.items?.map((item, itemIndex) => (
-                                <ListItem
-                                  key={itemIndex}
-                                  title={item.label}
-                                  href={item.href}
-                                  icon={item.icon}
-                                  type={link.type}
-                                >
-                                  {item.description}
-                                </ListItem>
-                              ))}
-                            </div>
-                          ) : (
-                            <div className="grid gap-3 p-4">
-                              {link.items?.map((item, itemIndex) => (
-                                <ListItem
-                                  key={itemIndex}
-                                  title={item.label}
-                                  href={item.href}
-                                  type={link.type}
-                                >
-                                  {item.description}
-                                </ListItem>
-                              ))}
-                            </div>
-                          )}
-                        </NavigationMenuContent>
-                      </>
-                    ) : (
-                      <NavigationMenuLink
-                        href={link.href}
-                        className={cn(navigationMenuTriggerStyle(), 'cursor-pointer')}
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        {link.label}
-                      </NavigationMenuLink>
-                    )}
-                  </NavigationMenuItem>
-                ))}
-                </NavigationMenuList>
+                    {navigationLinks.map((link, index) => (
+                      <NavigationMenuItem key={index}>
+                        {link.submenu ? (
+                          <>
+                            <NavigationMenuTrigger>
+                              {link.label}
+                            </NavigationMenuTrigger>
+                            <NavigationMenuContent>
+                              {link.type === "description" &&
+                              link.label === "Features" ? (
+                                <div className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+                                  {/* features */}
+                                  <div className="row-span-3">
+                                    <NavigationMenuLink asChild>
+                                      <button className="flex h-full w-full select-none flex-col justify-center items-center text-center rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md cursor-pointer">
+                                        <div className="mb-3 text-xl font-medium">
+                                          shadcn.io
+                                        </div>
+                                        <p className="text-sm leading-tight text-muted-foreground">
+                                          Beautifully designed components built
+                                          with Radix UI and Tailwind CSS.
+                                        </p>
+                                      </button>
+                                    </NavigationMenuLink>
+                                  </div>
+                                  {link.items?.map((item, itemIndex) => (
+                                    <Link
+                                      key={itemIndex}
+                                      to={item.href}
+                                      onClick={() =>
+                                        onNavItemClick?.(item.href)
+                                      }
+                                      className="pointer-events-auto"
+                                    >
+                                      <ListItem
+                                        title={item.label}
+                                        href={item.href}
+                                        type={link.type}
+                                      >
+                                        {item.description}
+                                      </ListItem>
+                                    </Link>
+                                  ))}
+                                </div>
+                              ) : link.type === "simple" ? (
+                                <div className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                                  {link.items?.map((item, itemIndex) => (
+                                    <Link
+                                      key={itemIndex}
+                                      to={item.href}
+                                      onClick={() =>
+                                        onNavItemClick?.(item.href)
+                                      }
+                                      className="pointer-events-auto"
+                                    >
+                                      <ListItem
+                                        title={item.label}
+                                        href={item.href}
+                                        type={link.type}
+                                      >
+                                        {item.description}
+                                      </ListItem>
+                                    </Link>
+                                  ))}
+                                </div>
+                              ) : link.type === "icon" ? (
+                                <div className="grid w-[400px] gap-3 p-4">
+                                  {link.items?.map((item, itemIndex) => (
+                                    <Link
+                                      key={itemIndex}
+                                      to={item.href}
+                                      onClick={() =>
+                                        onNavItemClick?.(item.href)
+                                      }
+                                      className="pointer-events-auto"
+                                    >
+                                      <ListItem
+                                        title={item.label}
+                                        href={item.href}
+                                        icon={item.icon}
+                                        type={link.type}
+                                      >
+                                        {item.description}
+                                      </ListItem>
+                                    </Link>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="grid gap-3 p-4">
+                                  {link.items?.map((item, itemIndex) => (
+                                    <Link
+                                      key={itemIndex}
+                                      to={item.href}
+                                      onClick={() =>
+                                        onNavItemClick?.(item.href)
+                                      }
+                                      className="pointer-events-auto"
+                                    >
+                                      <ListItem
+                                        title={item.label}
+                                        href={item.href}
+                                        type={link.type}
+                                      >
+                                        {item.description}
+                                      </ListItem>
+                                    </Link>
+                                  ))}
+                                </div>
+                              )}
+                            </NavigationMenuContent>
+                          </>
+                        ) : (
+                          <NavigationMenuLink asChild>
+                            <Link
+                              to={link.href!}
+                              className={cn(
+                                navigationMenuTriggerStyle(),
+                                "cursor-pointer"
+                              )}
+                              onClick={() => onNavItemClick?.(link.href!)}
+                            >
+                              {link.label}
+                            </Link>
+                          </NavigationMenuLink>
+                        )}
+                      </NavigationMenuItem>
+                    ))}
+                  </NavigationMenuList>
                 </NavigationMenu>
               )}
             </div>
           </div>
-          {/* Right side */}
+          {/* Right side sign in*/}
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
@@ -429,27 +493,27 @@ export const Navbar02 = React.forwardRef<HTMLElement, Navbar02Props>(
   }
 );
 
-Navbar02.displayName = 'Navbar02';
+Navbar02.displayName = "Navbar02";
 
 // ListItem component for navigation menu items
 const ListItem = React.forwardRef<
-  React.ElementRef<'a'>,
-  React.ComponentPropsWithoutRef<'a'> & {
+  React.ElementRef<"a">,
+  React.ComponentPropsWithoutRef<"a"> & {
     title: string;
     href?: string;
     icon?: string;
-    type?: 'description' | 'simple' | 'icon';
+    type?: "description" | "simple" | "icon";
     children?: React.ReactNode;
   }
 >(({ className, title, children, icon, type, ...props }, ref) => {
   const renderIconComponent = (iconName?: string) => {
     if (!iconName) return null;
     switch (iconName) {
-      case 'BookOpenIcon':
+      case "BookOpenIcon":
         return <BookOpenIcon className="h-5 w-5" />;
-      case 'LifeBuoyIcon':
+      case "LifeBuoyIcon":
         return <LifeBuoyIcon className="h-5 w-5" />;
-      case 'InfoIcon':
+      case "InfoIcon":
         return <InfoIcon className="h-5 w-5" />;
       default:
         return null;
@@ -460,14 +524,13 @@ const ListItem = React.forwardRef<
     <NavigationMenuLink asChild>
       <a
         ref={ref}
-        onClick={(e) => e.preventDefault()}
         className={cn(
-          'block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground cursor-pointer',
+          "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground cursor-pointer",
           className
         )}
         {...props}
       >
-        {type === 'icon' && icon ? (
+        {type === "icon" && icon ? (
           <div className="flex items-start space-x-4">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
               {renderIconComponent(icon)}
@@ -495,6 +558,6 @@ const ListItem = React.forwardRef<
     </NavigationMenuLink>
   );
 });
-ListItem.displayName = 'ListItem';
+ListItem.displayName = "ListItem";
 
 export { Logo, HamburgerIcon };
