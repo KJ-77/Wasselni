@@ -1,0 +1,1 @@
+// this page will be seperated into two sections and i will be using isActive to determine which section to show
