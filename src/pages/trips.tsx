@@ -1,3 +1,13 @@
+import Map from "@/components/map"
+
+const Trips = () => {
 
 
-// this page is for further implementation of trips page that will include buses or vans that wish to make touristic rides and trips
+  return (
+    <div style={{ width: "100vw", height: "100vh" }}>
+      <Map  />
+    </div>
+  )
+}
+
+export default Trips

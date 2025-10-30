@@ -123,17 +123,17 @@ const defaultNavigationLinks: Navbar02NavItem[] = [
     type: "description",
     items: [
       {
-        href: "/frontpage",
+        href: "/bus",
         label: "Real-Time Bus Tracker",
         description: "Track your bus live and never miss a ride again!",
       },
       {
-        href: "/carpoolOptions",
+        href: "/carpool",
         label: "Smart Carpooling",
         description: "Connect with nearby commuters and split costs instantly.",
       },
       {
-        href: "/TouristicRides",
+        href: "/trips",
         label: "Discover Lebanon",
         description: "Explore Lebanon's hidden gems with our curated trips.",
       },
