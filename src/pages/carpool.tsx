@@ -11,8 +11,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RotatingText from "@/components/ui/rotatingtext";
+// import { Car } from "lucide-react";
 
-export function Frontpage() {
+export function Carpool() {
   return (
     <div>
       <div className="flex items-center justify-center">
@@ -95,4 +96,4 @@ export function Frontpage() {
   );
 }
 
-export default Frontpage;
+export default Carpool;

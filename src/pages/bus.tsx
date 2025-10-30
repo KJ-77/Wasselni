@@ -1,7 +1,7 @@
 import homePic from "../assets/homeWallpaper/final.png";
 import OptionForm from "@/components/optionForm";
 
-const Home = () => {
+const Bus = () => {
 
   return (
     <div>
@@ -19,7 +19,7 @@ const Home = () => {
             One Lebanon. One Route. One Ride.
           </h1>
           <p className="text-lg">
-            From the Mountains to the Sea — Ride Together..
+            From the Sea to the Mountain — Ride Together..
           </p>
         </div>
 
@@ -46,4 +46,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Bus;
