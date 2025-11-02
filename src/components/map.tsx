@@ -1,30 +1,39 @@
-import { useEffect, useRef } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
-// to configure Mapbox with the access token founnd in .env.local
-mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
+import { useRef, useEffect } from "react";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
 
-
-// we start creating our map component
 export default function Map() {
+  const mapContainer = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
 
-    const mapRef = useRef(null);
+  useEffect(() => {
+    if (mapRef.current || !mapContainer.current) return;
 
-    useEffect(() => {
-        const map = new mapboxgl.Map({
-            container: mapRef.current!,
-            style: 'mapbox://styles/mapbox/streets-v11',
-            center: [35.8623, 33.8869], // Centered on Lebanon
-            zoom: 7,
-        });
-        return () => {
-            map.remove();
-        };
-    }, []);
-  
-    return <div 
-    className="w-full h-[500px] md:h-[600px] rounded-2xl transition-all duration-500 shadow-inner"
-  />;
+    mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN ?? "pk.eyJ1IjoicmFtaS1uYXNyMDEiLCJhIjoiY21oaHQ1aHIyMHJ5czJqczd0a20yYmYwbyJ9.8FDq02CuNmGDmtuE2rTKEw";
+
+    try {
+      mapRef.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: "mapbox://styles/mapbox/streets-v12",
+        center: [35.5018, 33.8938], // Beirut
+        zoom: 12,
+      });
+
+      mapRef.current.addControl(new mapboxgl.NavigationControl(), "top-right");
+
+      mapRef.current.on("load", () => {
+        console.log("✅ Map loaded successfully");
+      });
+    } catch (err) {
+      console.error("❌ Mapbox initialization failed:", err);
+    }
+  }, []);
+
+  return (
+    <div
+      ref={mapContainer}
+      className="w-full h-[300px] md:h-[400px] rounded-2xl overflow-hidden shadow-inner border border-slate-700"
+      style={{ backgroundColor: "#1e293b" }} // dark slate fallback
+    />
+  );
 }
-
-

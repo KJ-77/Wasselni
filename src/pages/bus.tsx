@@ -37,13 +37,13 @@ const Bus = () => {
       >
         <div className="w-full max-w-6xl relative">
           <Card className="overflow-hidden border-none bg-slate-900/60 backdrop-blur-xl shadow-2xl rounded-2xl">
-            <CardHeader className="absolute top-4 left-4 z-10 bg-slate-800/70 backdrop-blur-md rounded-lg p-3 shadow-lg">
+            <CardHeader className="absolute top-4 left-4 z-10 backdrop-blur-md rounded-lg p-3 shadow-lg">
               <CardTitle className="text-lg text-indigo-400 font-semibold">
                 Active Routes
               </CardTitle>
             </CardHeader>
 
-            <CardContent className="p-0">
+            <CardContent className="w-full max-w-5xl p-0">
               {/* MAP */}
               <Map />
             </CardContent>
