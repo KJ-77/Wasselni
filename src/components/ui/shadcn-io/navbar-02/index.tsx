@@ -144,7 +144,7 @@ const defaultNavigationLinks: Navbar02NavItem[] = [
     submenu: true,
     type: "simple",
     items: [
-      { href: "/dashboard/profile", label: "Catch a Bus" },
+      { href: "#product-a", label: "Catch a Bus" },
       { href: "#product-b", label: "Join a Carpool" },
     ],
   },
