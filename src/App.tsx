@@ -5,6 +5,7 @@ import Carpool from "./pages/carpool";
 // import Navbar from "./components/navbar";
 import { ThemeProvider } from "@/components/theme-provider"
 import { Navbar02 } from "@/components/ui/shadcn-io/navbar-02/index"; 
+import Profile from "./pages/dashboard/profile";
 
 
 const App = () => {
@@ -17,6 +18,8 @@ const App = () => {
           <Route path="/" element= {<Home />} />
           <Route path="/carpool" element={<Carpool />} />
           <Route path="/Bus" element={<Bus />} />
+          <Route path="/dashboard/profile" element={<Profile />} />
+          <Route path="/vehicles" element={<Bus />} />
           {/* <Route path="/*" element={<NotFoundPage />} /> */}
         </Routes>
       </ThemeProvider>
