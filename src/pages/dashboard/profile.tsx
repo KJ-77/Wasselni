@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
+// import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 // import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +10,39 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export default function ProfileDashboard() {
   const [tab, setTab] = useState("about");
+  const [user, setUser] = useState<ApiUser | null>(null);
+  // const { id } = useParams<{ id: string }>();
+
+  interface ApiUser {
+    id: string;
+    name: string;
+    email: string;
+    full_name: string;
+    // Add other user fields as necessary
+  }
+
+  const fetchUser = useCallback(async () => {
+    try {
+      const response = await fetch(
+        `https://rl4ynabhzk.execute-api.me-central-1.amazonaws.com/users/3`
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: ApiUser = await response.json();
+      setUser(data);
+    } catch (err) {
+      console.error("Error fetching user:", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
+
+  console.log("Fetched user:", user);
 
   return (
     <div className="max-w-5xl mx-auto mt-12">
@@ -68,7 +102,7 @@ export default function ProfileDashboard() {
             <AvatarFallback>Rami</AvatarFallback>
           </Avatar>
           <div className="flex flex-col items-start">
-            <span className="text-lg font-semibold">User ID</span>
+            <span className="text-lg font-semibold">{user?.full_name}</span>
             <Badge variant="secondary" className="mt-1">
               New
             </Badge>
