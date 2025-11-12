@@ -119,7 +119,10 @@ export default function ProfileDashboard() {
                     </Button>
 
                     <div>
-                      <h3 className="font-semibold mb-2">Verify your profile</h3>
+                      <div className="flex items-center justify-center mb-4 border-b border-gray-200"> 
+                         <h3 className="font-semibold mb-2">Verify your profile</h3>
+                      </div>
+                     
                       <div className="space-y-2">
                         <Button variant="ghost" className="w-full justify-start">
                           Verify ID
@@ -135,7 +138,9 @@ export default function ProfileDashboard() {
                     </div>
 
                     <div>
+                      <div className="flex items-center justify-center mb-4 border-b border-gray-200"> 
                       <h3 className="font-semibold mb-2">About you</h3>
+                      </div>
                       <Button variant="ghost" className="w-full justify-start">
                         Add a mini bio
                       </Button>
@@ -145,7 +150,9 @@ export default function ProfileDashboard() {
                     </div>
 
                     <div>
+                      <div className="flex items-center justify-center mb-4  border-b border-gray-200"> 
                       <h3 className="font-semibold mb-2">Vehicles</h3>
+                      </div>
                       <Button variant="ghost" className="w-full justify-start">
                         Add vehicle
                       </Button>
