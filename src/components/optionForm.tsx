@@ -1,167 +1,148 @@
 import * as React from "react";
-import { FaUser, FaCalendarAlt, FaDotCircle } from "react-icons/fa";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { MapPinIcon, SearchIcon, ArrowLeftIcon, ArrowRightIcon, UserIcon } from "lucide-react";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import {
   MiniCalendar,
   MiniCalendarDay,
   MiniCalendarDays,
   MiniCalendarNavigation,
-} from '@/components/ui/shadcn-io/mini-calendar/index';
-import { useState } from 'react';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Input } from "./ui/input";
-import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react';
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group"
-
-
+} from "@/components/ui/shadcn-io/mini-calendar";
+import { FaCalendarAlt } from "react-icons/fa";
 
 function OptionForm() {
   const [passengers, setPassengers] = React.useState(1);
-  // const [openFrom, setOpenFrom] = React.useState("");
-  // const [openTo, setOpenTo] = React.useState("");
   const [openDate, setOpenDate] = React.useState(false);
   const [openPassengers, setOpenPassengers] = React.useState(false);
-  // const [date, setDate] = React.useState<Date | undefined>(undefined);
+  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(new Date());
 
   const increment = () => setPassengers((p) => p + 1);
   const decrement = () => setPassengers((p) => (p > 1 ? p - 1 : 1));
 
-
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const date = selectedDate;
-
-
   return (
-    <div
-      className="flex items-center justify-between w-full max-w-[2000px]
-      bg-white rounded-[15px] shadow-sm border border-gray-200 overflow-hidden select-none"
-    >
-      {/* for alignment purposes */}
-      <div />
-      {/* Leaving From */}
+    <div className="w-full flex justify-center py-10 px-4">
+      <Card className="w-full  max-w-4xl h-full shadow-lg border-0 ">
+        <CardHeader>
+          <CardTitle className="text-2xl font-semibold text-center">
+            Find a Ride
+          </CardTitle>
+        </CardHeader>
 
-      <div className="w-auto flex items-center justify-center px-4 py-2 hover:bg-gray-100 transition text-sm font-medium text-gray-600 ">
-        
-        <InputGroup>
-        <InputGroupInput placeholder="Leaving from" />
-        <InputGroupAddon>
-          <FaDotCircle className="text-gray-500" />
-        </InputGroupAddon>
-      </InputGroup>{/* <input
-          type="text"
-          placeholder="Leaving from"
-          className="outline-none bg-transparent text-gray-600 placeholder-gray-500"
-          style={{textAlign:"center"}}
-        /> */}
-      </div>
-
-      <div className="h-6 border-l border-gray-300" />
-
-      {/* Going To */}
-
-      <div className=" flex items-center px-4 py-2 hover:bg-gray-100 transition text-sm font-medium text-gray-600 cursor-pointer">
-        <FaDotCircle className="text-gray-500" />
-        <Input type="search" placeholder="Going to" className="shadow-none border-0 w-60 outline-none focus-visible:ring-0 focus-visible:ring-offset-0" style={{textAlign:"center"}} />
-        {/* <input
-          type="text"
-          placeholder="Going to"
-          className="outline-none bg-transparent text-gray-600 placeholder-gray-500"
-        /> */}
-      </div>
-
-      <div className="h-6 border-l border-gray-300" />
-
-      {/* Date Picker */}
-      <Popover open={openDate} onOpenChange={setOpenDate}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="ghost"
-            id="date"
-            className="flex items-center space-x-2 px-4 py-3 hover:bg-gray-100 transition text-sm font-medium text-gray-600"
-          >
-            <FaCalendarAlt className="text-gray-500" />
-            {date ? date.toLocaleDateString() : "Select date"}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto overflow-hidden p-0" align="start">
-          <div className="space-y-4">
-      <MiniCalendar onValueChange={setSelectedDate} value={selectedDate}>
-        <MiniCalendarNavigation asChild direction="prev">
-        <Button size="icon" variant="outline">
-          <ArrowLeftIcon className="size-4" />
-        </Button>
-      </MiniCalendarNavigation>
-        <MiniCalendarDays>
-          {(date) => <MiniCalendarDay date={date} key={date.toISOString()} />}
-        </MiniCalendarDays>
-         <MiniCalendarNavigation asChild direction="next">
-        <Button size="icon" variant="outline">
-          <ArrowRightIcon className="size-4" />
-        </Button>
-      </MiniCalendarNavigation>
-      </MiniCalendar>
-      {selectedDate && (
-        <p className="text-muted-foreground text-sm">
-          Selected:{' '}
-          {selectedDate.toLocaleDateString('en-US', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
-        </p>
-      )}
-    </div>
-        </PopoverContent>
-      </Popover>
-
-      <div className="h-6 border-l border-gray-300" />
-
-      {/* Passengers */}
-      <Popover open={openPassengers} onOpenChange={setOpenPassengers}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="ghost"
-            className="flex items-center space-x-2 px-4 py-3 hover:bg-gray-100 transition text-sm font-medium text-gray-600"
-          >
-            <FaUser className="text-gray-500" />
-            <span>
-              {passengers} Passenger{passengers > 1 ? "s" : ""}
-            </span>
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-4" align="start">
-          <div className="flex items-center gap-4">
-            <span className="text-sm font-medium text-gray-600">Passenger</span>
-            <button
-              onClick={decrement}
-              className="w-6 h-6 rounded-full border border-gray-400 flex items-center justify-center text-gray-500 hover:bg-gray-100"
-            >
-              −
-            </button>
-            <span className="w-4 text-center">{passengers}</span>
-            <button
-              onClick={increment}
-              className="w-6 h-6 rounded-full border border-blue-400 flex items-center justify-center text-blue-500 hover:bg-blue-50"
-            >
-              +
-            </button>
+        <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Leaving From */}
+          <div className="flex flex-col space-y-2">
+            <Label className="text-lg font-medium">Leaving from</Label>
+            <div className="relative">
+              <MapPinIcon className="absolute left-3 top-3 size-5 text-muted-foreground" />
+              <Input placeholder="Beirut Downtown" className="pl-10" />
+            </div>
           </div>
-        </PopoverContent>
-      </Popover>
 
-      {/* Search Button */}
-      <button className="bg-green-900 hover:bg-green-950 text-white font-semibold text-sm px-6 py-3 rounded-r-[15px] transition">
-        Search
-      </button>
+          {/* Going To */}
+          <div className="flex flex-col space-y-2">
+            <Label className="text-lg font-medium">Going to</Label>
+            <div className="relative">
+              <MapPinIcon className="absolute left-3 top-3 size-5 text-muted-foreground" />
+              <Input placeholder="Jounieh Marina" className="pl-10" />
+            </div>
+          </div>
+
+          {/* Date */}
+          <div className="flex flex-col space-y-2">
+            <Label className="text-lg font-medium">Pick a date</Label>
+
+            <Popover open={openDate} onOpenChange={setOpenDate}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="justify-start font-normal"
+                >
+                  <FaCalendarAlt className="mr-2 " />
+                  {selectedDate
+                    ? selectedDate.toLocaleDateString()
+                    : "Select date"}
+                </Button>
+              </PopoverTrigger>
+
+              <PopoverContent
+                align="start"
+                className="w-auto overflow-hidden p-0 bg-transparent shadow-none border-0"
+              >
+                <div className="space-y-4 p-4">
+                  <MiniCalendar
+                    value={selectedDate}
+                    onValueChange={setSelectedDate}
+                  >
+                    <MiniCalendarNavigation asChild direction="prev">
+                      <Button size="icon" variant="outline">
+                        <ArrowLeftIcon className="h-4 w-4" />
+                      </Button>
+                    </MiniCalendarNavigation>
+
+                    <MiniCalendarDays>
+                      {(date) => (
+                        <MiniCalendarDay key={date.toISOString()} date={date} />
+                      )}
+                    </MiniCalendarDays>
+
+                    <MiniCalendarNavigation asChild direction="next">
+                      <Button size="icon" variant="outline">
+                        <ArrowRightIcon className="size-4" />
+                      </Button>
+                    </MiniCalendarNavigation>
+                  </MiniCalendar>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* Passengers */}
+          <div className="flex flex-col space-y-2">
+            <Label className="text-lg font-medium">Passengers</Label>
+
+            <Popover open={openPassengers} onOpenChange={setOpenPassengers}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="justify-start font-normal">
+                  <UserIcon className="mr-2 size-5" />
+                  {passengers} Passenger{passengers > 1 ? "s" : ""}
+                </Button>
+              </PopoverTrigger>
+
+              <PopoverContent className="w-52 p-4" align="start">
+                <div className="flex items-center justify-between">
+                  <Button size="icon" variant="outline" onClick={decrement}>
+                    –
+                  </Button>
+
+                  <Input
+                    value={passengers}
+                    readOnly
+                    className="w-12 text-center"
+                  />
+
+                  <Button size="icon" variant="default" onClick={increment}>
+                    +
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* Search Button Full Width */}
+          <div className="col-span-full">
+            <Button
+              size="lg"
+              className="w-full rounded-xl font-medium text-lg py-6 bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow"
+            >
+              <SearchIcon className="mr-2 size-5" />
+              Search Rides
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
