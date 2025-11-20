@@ -48,7 +48,7 @@ export default function ProfileDashboard() {
     <div className="max-w-5xl mx-auto mt-12">
       <Tabs value={tab} onValueChange={setTab} className="w-full">
         {/* Tabs Header */}
-        <div className="border-b border-gray-200 mb-8 flex justify-center">
+        <div className="border-b border-gray-200 mb-8 flex justify-center pt-8">
           <TabsList className="flex gap-6 bg-transparent shadow-none">
             <TabsTrigger
               value="about"
