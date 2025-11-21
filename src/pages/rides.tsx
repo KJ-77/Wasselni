@@ -1,7 +1,7 @@
 import OptionForm from "@/components/optionForm";
 import Filters from "@/components/ridesComp/filtersPanel";
 import RouteMap from "@/components/ridesComp/routeMap";
-// import SearchBar from "@/components/ridesComp/searchBar";
+
 import RideList from "@/components/ridesComp/ridesList";
 
 
