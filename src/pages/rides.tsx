@@ -1,4 +1,4 @@
-// import OptionForm from "@/components/optionForm";
+import OptionForm from "@/components/optionForm";
 import Filters from "@/components/ridesComp/filtersPanel";
 import RouteMap from "@/components/ridesComp/routeMap";
 
@@ -22,11 +22,15 @@ export default function Rides() {
         <Filters />
       </div>
 
-      {/* Search Bar
+      {/* Search Bar */}
       <div className="col-span-12">
+        {/* <SearchBar
+        mapVisible={false}
+        onToggleMap={() => {}}
+        /> */}
         <OptionForm />
       </div>
- */}
+
 
 
       {/* Rides List */}
