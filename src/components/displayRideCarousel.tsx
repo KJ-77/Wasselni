@@ -1,6 +1,8 @@
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Star } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { Badge } from "@/components/ui/badge";
 
 export type Ride = {
   driverInitials: string;
@@ -70,6 +72,15 @@ export default function DisplayRideCarousel({ rides }: DisplayRideCarouselProps)
             <div className="text-sm mb-3">
               <div className="font-semibold">{ride.from}</div>
               <div className="text-xs mt-1 text-var-card-foreground/80">{ride.startTime}</div>
+            </div>
+           <div className="flex items-center pl-3 my-4 gap-4">
+              <Slider defaultValue={[30]} max={30} step={0} disabled color="blue"
+              orientation="vertical" inverted/>  
+              <Slider defaultValue={[30]} max={30} step={0} disabled color="blue"
+              orientation="vertical" /> 
+              <Badge variant="outline" className="px-3 py-1 text-gray-700">
+                🚗 {ride.duration} • 85 km • Highway Route
+              </Badge>
             </div>
 
             <div className="text-sm mb-4">

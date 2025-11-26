@@ -14,6 +14,7 @@ import FaqSection from "@/components/home/faqSection";
 import GroupCtaSection from "@/components/home/groupCtaSection";
 
 
+
 const rides: Ride[] = [
   {
     driverInitials: "AM",

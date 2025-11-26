@@ -59,9 +59,11 @@ function RideCard() {
               <p className="text-sm font-medium">Today 2:30 PM</p>
             </div>
 
-            <div className="flex items-center pl-10 my-4 gap-4">
-              <Slider defaultValue={[0]} max={30} step={0} disabled color="blue"
-              orientation="vertical"/> 
+            <div className="flex items-center pl-7 my-4 gap-4">
+              <Slider defaultValue={[30]} max={30} step={0} disabled color="blue"
+              orientation="vertical" inverted/>  
+              <Slider defaultValue={[30]} max={30} step={0} disabled color="blue"
+              orientation="vertical" /> 
               <Badge variant="outline" className="px-3 py-1 text-gray-700">
                 🚗 2h 15m • 85 km • Highway Route
               </Badge>
