@@ -45,10 +45,10 @@ export default function ProfileDashboard() {
   console.log("Fetched user:", user);
 
   return (
-    <div className="max-w-5xl mx-auto mt-12">
+    <div className="max-w-5xl mx-auto mt-12 min-h-screen px-4">
       <Tabs value={tab} onValueChange={setTab} className="w-full">
         {/* Tabs Header */}
-        <div className="border-b border-gray-200 mb-8 flex justify-center">
+        <div className="border-b border-gray-200 mb-8 flex justify-center pt-8">
           <TabsList className="flex gap-6 bg-transparent shadow-none">
             <TabsTrigger
               value="about"

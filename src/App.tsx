@@ -3,6 +3,7 @@ import Home from "./pages/home";
 import Bus from "./pages/bus";
 import Carpool from "./pages/carpool";
 import Rides from "./pages/rides"; // Import the Rides component
+import OfferRidesPage from "./pages/offerRides"; // Import the Offer Rides page
 // import Navbar from "./components/navbar";
 import { ThemeProvider } from "@/components/theme-provider"
 import { Navbar02 } from "@/components/ui/shadcn-io/navbar-02/index"; 
@@ -25,6 +26,7 @@ const App = () => {
           <Route path="/carpool" element={<Carpool />} />
           <Route path="/Bus" element={<Bus />} />
           <Route path="/rides" element={<Rides />} /> {/* New route for rides */}
+          <Route path="/offerRides" element={<OfferRidesPage />} /> {/* New route for offer rides */}
           <Route path="/dashboard/profile" element={<Profile />} />
           <Route path="/vehicles" element={<Bus />} />
           <Route path="/dashboard/ratingsReceived" element={<RatingsReceived />} />

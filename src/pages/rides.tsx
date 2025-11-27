@@ -1,29 +1,54 @@
-import { useSearchParams } from "react-router-dom";
+import OptionForm from "@/components/optionForm";
+import Filters from "@/components/ridesComp/filtersPanel";
+import RouteMap from "@/components/ridesComp/routeMap";
 
-function Rides() {
-  const [searchParams] = useSearchParams();
+import RideList from "@/components/ridesComp/ridesList";
 
-  const from = searchParams.get("from");
-  const to = searchParams.get("to");
-  const date = searchParams.get("date");
-  const passengers = searchParams.get("passengers");
+
+
+
+
+// Added required props for RouteMap and dummy data
+export default function Rides() {
+  const dummyRoute: { distance: number; duration: string; traffic: "Light" | "Moderate" | "Heavy"; } = {
+    distance: 85,
+    duration: "2h 15m",
+    traffic: "Light",
+  };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">Available Rides</h1>
+    <div className="min-h-screen">
+      <div className="w-full pt-7 pb-10 px-4 md:px-8 lg:px-16"></div>
 
-      <div className="bg-white shadow-md rounded-lg p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-4">Your Search Criteria:</h2>
-        <p><strong>From:</strong> {from || "N/A"}</p>
-        <p><strong>To:</strong> {to || "N/A"}</p>
-        <p><strong>Date:</strong> {date || "N/A"}</p>
-        <p><strong>Passengers:</strong> {passengers || "N/A"}</p>
+
+      <div className="flex">
+        {/* Left column: Filters */}
+        <aside className="h-[calc(100vh-4rem)] sticky top-16 overflow-y-auto border-r border-primary">
+          <Filters />
+        </aside>
+
+
+        <main className="flex-1 p-6">
+          {/* Sticky OptionForm */}
+          <div className="sticky top-4 z-40 pb-4">
+            <OptionForm />
+          </div>
+
+          {/* Scrollable rides list */}
+          <RideList />
+
+          
+        </main>
+                {/* Right column: RouteMap */}
+        <aside className=" w-1/4 top-160 relative pb-100 pr-20">
+          <div className="sticky top-1/2 -translate-y-1/2 ">
+            <RouteMap {...({ routeInfo: dummyRoute } as any)} />
+          </div>
+        </aside>
       </div>
 
-      <div className="text-center text-gray-500 text-lg">
-        <p>Ride results will be displayed here.</p>
-        <p> (This is a placeholder for now)</p>
-      </div>
-    </div>
+     
+          </div>
+        
   );
-}export default Rides;
+} 
