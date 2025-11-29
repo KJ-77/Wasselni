@@ -1,12 +1,34 @@
-export interface CarDetails {
-  brand: string;
-  model: string;
-  year: string;
+export interface Destination {
+  departure?: {
+    departureCity?: string;
+    departureDate?: string;
+    departureTime?: string;
+    specificDepartureLocation?: string;
+  }
+  arrival?: {
+      arrivalCity?: string;
+      specificArrivalLocation?: string;
+  };
+  roundTrip: boolean;
+  roundTripDates?: {
+    departureDate?: string;
+    returnDate?: string;
+  };
 }
 
 export interface DriverInfo {
   fullName: string;
   phone: string;
+  email: string;
+}
+
+export interface VehicleInfo {
+  brand: string;
+  model: string;
+  year: string;
+  seats: string;
+  pricePerSeat: string;
+  description?: string;
 }
 
 export interface PaymentInfo {
@@ -15,7 +37,8 @@ export interface PaymentInfo {
 }
 
 export interface WizardData {
-  car: CarDetails;
+  ride1: Destination;
   driver: DriverInfo;
+  vehicle: VehicleInfo;
   payment: PaymentInfo;
 }

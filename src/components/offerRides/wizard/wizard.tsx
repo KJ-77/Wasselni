@@ -17,8 +17,13 @@ export default function Wizard() {
   const [error, setError] = useState<string | null>(null);
 
   const [data, setData] = useState<WizardData>({
-    car: { brand: "", model: "", year: "" },
-    driver: { fullName: "", phone: "" },
+    ride1: {
+      departure: { departureCity: "", departureDate: "", departureTime: "" },
+      arrival: { arrivalCity: "" },
+      roundTrip: false,
+    },
+    driver: { fullName: "", phone: "", email: "" },
+    vehicle: { brand: "", model: "", year: "", seats: "", pricePerSeat: "" },
     payment: { method: "", cardNumber: "" },
   });
 
@@ -46,13 +51,41 @@ export default function Wizard() {
   const renderStep = () => {
     switch (currentStep) {
       case 1:
-        return <Step1CarDetails data={data} setData={setData} />;
+        return (
+          <Step1CarDetails
+            data={data}
+            setData={setData}
+            currentStep={currentStep}
+            getStepTitle={getStepTitle}
+          />
+        );
       case 2:
-        return <Step2DriverInfo data={data} setData={setData} />;
+        return (
+          <Step2DriverInfo
+            data={data}
+            setData={setData}
+            currentStep={currentStep}
+            getStepTitle={getStepTitle}
+          />
+        );
       case 3:
-        return <Step3Payment data={data} setData={setData} />;
+        return (
+          <Step3Payment
+            data={data}
+            setData={setData}
+            currentStep={currentStep}
+            getStepTitle={getStepTitle}
+          />
+        );
       case 4:
-        return <Step4Summary data={data} setData={setData} />;
+        return (
+          <Step4Summary
+            data={data}
+            setData={setData}
+            currentStep={currentStep}
+            getStepTitle={getStepTitle}
+          />
+        );
     }
   };
 
@@ -98,9 +131,11 @@ export default function Wizard() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="max-w-2xl mx-auto py-6 space-y-8"
+      className="w-full mx-auto py-6 space-y-8 flex flex-col items-center px-4"
     >
-      <Stepper steps={steps} currentStep={currentStep} />
+      <div className="w-full flex justify-center">
+        <Stepper steps={steps} currentStep={currentStep} />
+      </div>
 
       <AnimatePresence mode="wait">
         <motion.div
@@ -109,13 +144,22 @@ export default function Wizard() {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.3 }}
+          className="w-full flex justify-center"
         >
-          <div className="mb-6">
+          {/* <div className="mb-6">
             <h2 className="text-2xl font-semibold mb-2">{getStepTitle()}</h2>
             <p className="text-muted-foreground">Step {currentStep} of 4</p>
-          </div>
-          <div className="p-6 border rounded-xl shadow-sm bg-card">
-            {renderStep()}
+          </div> */}
+
+
+
+
+{/* MAIN container that calls the steps */}
+
+          <div className="w-full flex justify-center">
+            <div className="w-full max-w-[96rem]">{/* card container set to very large (8XL-like) */}
+              {renderStep()}
+            </div>
           </div>
         </motion.div>
       </AnimatePresence>
@@ -143,7 +187,7 @@ export default function Wizard() {
           <motion.div
             animate={{ scale: [1, 1.05, 1] }}
             transition={{ repeat: Infinity, duration: 1.5 }}
-            className="bg-white rounded-lg p-6 shadow-lg"
+            className=" rounded-lg p-6 shadow-lg"
           >
             <p className="font-semibold">Creating your ride...</p>
           </motion.div>

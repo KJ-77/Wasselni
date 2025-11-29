@@ -29,8 +29,8 @@ export default function OfferRidesPage() {
       variants={containerVariants}
       className="w-full min-h-screen bg-gradient-to-br from-background via-background to-muted/20 pt-24 pb-16"
     >
-      <div className="max-w-6xl mx-auto px-4">
-        <motion.div variants={itemVariants} className="mb-12 text-center">
+      <div className="max-w-6xl">
+        <motion.div variants={itemVariants} className="mb-6 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             Offer a Ride
           </h1>
@@ -39,12 +39,17 @@ export default function OfferRidesPage() {
           </p>
         </motion.div>
 
-       
+          
 
-        <motion.div variants={itemVariants}>
+    
+      </div>
+      <div className="w-full flex justify-center">
+         <motion.div variants={itemVariants}>
           <Wizard />
         </motion.div>
       </div>
+
+
     </motion.div>
   );
 }
