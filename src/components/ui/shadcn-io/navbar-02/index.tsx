@@ -153,12 +153,12 @@ const defaultNavigationLinks: Navbar02NavItem[] = [
     type: "icon",
     items: [
       {
-        href: "#getting-started",
+        href: "/quick-start-guide",
         label: "Quick Start Guide",
         icon: "BookOpenIcon",
       },
-      { href: "#tutorials", label: "How It Works", icon: "LifeBuoyIcon" },
-      { href: "#about-us", label: "Our Story", icon: "InfoIcon" },
+      { href: "/how-it-works", label: "How It Works", icon: "LifeBuoyIcon" },
+      { href: "/our-story", label: "Our Story", icon: "InfoIcon" },
     ],
   },
 ];

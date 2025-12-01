@@ -141,7 +141,7 @@ export function TripDetailsPage() {
                                     <span className="font-semibold">${trip.price} / seat</span>
                                 </div>
                                 <Button asChild size="lg" className="w-full mt-4">
-                                    <Link to={`/tripBookingPage/${trip.id}`}>Book Your Seat</Link>
+                                    <Link to={`/tripBooking/${trip.id}`}>Book Your Seat</Link>
                                 </Button>
                             </CardContent>
                         </Card>

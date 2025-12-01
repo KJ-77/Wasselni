@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { MapPin, Clock, Users, Landmark, Library, Mountain, Home } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+
 type Trip = {
   id: string;
   title: string;
@@ -75,7 +76,7 @@ export default function GroupTripsSection() {
     const navigate = useNavigate();
 
   const handleBook = (trip: Trip) => {
-    navigate("/tripBookingPage", { state: { trip } });
+    navigate(`/tripBooking/${trip.id}`);
   };
   const handleDestination = () => {
     navigate("/trips");
@@ -184,7 +185,7 @@ export default function GroupTripsSection() {
                     </div>
 
                     <div className="mt-6">
-                        <Button
+                      <Button
                         className="w-full rounded-full"
                         style={{
                           background: "var(--brand-gradient)",

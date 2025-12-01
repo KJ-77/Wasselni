@@ -50,7 +50,7 @@ export function TripBookingPage() {
             description: `You have successfully booked ${seatCount} seat(s) for "${trip?.title}".`,
             action: {
                 label: "View My Trips",
-                onClick: () => navigate('/trips'), // Assuming a future "My Trips" page
+                onClick: () => navigate('/trips'), 
             },
         });
         // In a real app, you'd navigate away or show a success state.
@@ -58,9 +58,9 @@ export function TripBookingPage() {
 
     if (!trip) {
         return (
-            <div className="container mx-auto px-4 py-24 text-center">
+            <div className="container mx-auto px-4 py-24 text-center mb-35">
                 <h1 className="text-4xl font-bold">Trip Not Found</h1>
-                <p className="mt-4 text-lg text-muted-foreground">The trip you are trying to book does not exist.</p>
+                <p className="mt-4 text-lg text-muted-foreground mb-30">The trip you are trying to book does not exist.</p>
                 <Button asChild className="mt-8">
                     <Link to="/trips">Back to All Trips</Link>
                 </Button>
@@ -82,7 +82,7 @@ export function TripBookingPage() {
             <div className="max-w-2xl mx-auto">
                 <div className="mb-6">
                     <Button asChild variant="ghost" className="pl-0">
-                         <Link to={`/trips/${tripId}`}><ArrowLeft className="mr-2 h-4 w-4" /> Back to Trip Details</Link>
+                         <Link to={`/tripDetails/${tripId}`}><ArrowLeft className="mr-2 h-4 w-4" /> Back to Trip Details</Link>
                     </Button>
                 </div>
                 <Card className="shadow-lg">

@@ -133,10 +133,10 @@ export function TripsPage() {
                     <div className="text-2xl font-bold text-primary">${trip.price} <span className="text-sm font-normal text-muted-foreground">/ seat</span></div>
                     <div className="w-full flex flex-col gap-2">
                          <Button asChild className="w-full">
-                            <Link to={`/tripBookingPage/${trip.id}`}>Book Your Seat Now</Link>
+                            <Link to={`/tripBooking/${trip.id}`}>Book Your Seat Now</Link>
                         </Button>
                         <Button asChild variant="link" className="p-0 h-auto">
-                            <Link to={`/trips/${trip.id}`}>
+                            <Link to={`/tripDetails/${trip.id}`}>
                                 View Details
                             </Link>
                         </Button>
