@@ -116,7 +116,6 @@ export interface Navbar02Props extends React.HTMLAttributes<HTMLElement> {
 
 // Default navigation links
 const defaultNavigationLinks: Navbar02NavItem[] = [
-  { href: "/", label: "Home" },
   {
     label: "Features",
     submenu: true,
@@ -144,8 +143,8 @@ const defaultNavigationLinks: Navbar02NavItem[] = [
     submenu: true,
     type: "simple",
     items: [
-      { href: "/dashboard/profile", label: "Catch a Bus" },
-      { href: "#product-b", label: "Join a Carpool" },
+      { href: "/rides", label: "Catch a ride" },
+      { href: "/offerRides", label: "Offer a ride" },
     ],
   },
   {
@@ -166,15 +165,17 @@ const defaultNavigationLinks: Navbar02NavItem[] = [
 
 export const Navbar02 = React.forwardRef<HTMLElement, Navbar02Props>(
   (
+
+    //TODO: did the hrefs for you in this way just change the paths if needed
     {
       className,
       logo = <Logo />,
       logoHref = "/",
       navigationLinks = defaultNavigationLinks,
       signInText = "Sign In",
-      signInHref = "#signin",
+      signInHref = "/auth/signin",
       ctaText = "Get Started",
-      ctaHref = "#get-started",
+      ctaHref = "/auth/signup",
       onNavItemClick,
       onSignInClick,
       onCtaClick,
