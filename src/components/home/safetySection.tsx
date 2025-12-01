@@ -2,8 +2,11 @@ import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { ShieldCheck, MapPin, Siren, Star } from "lucide-react";
+import { useNavigate } from "react-router-dom"; // ✅ import navigate
 
 export default function SafetySection() {
+  const navigate = useNavigate();
+
   const features = [
     {
       icon: <ShieldCheck className="w-6 h-6 text-blue-600" />,
@@ -26,6 +29,10 @@ export default function SafetySection() {
       desc: "Transparent rating system helps build trust. Both drivers and passengers rate each other after every trip.",
     },
   ];
+
+  const goToAccountTab = () => {
+    navigate("/dashboard/profile", { state: { tab: "account" } });
+  };
 
   return (
     <section className="w-full px-6 py-10 max-w-7xl mx-auto">
@@ -119,7 +126,13 @@ export default function SafetySection() {
                 </div>
               </div>
 
-              <button className="w-full py-3 bg-red-600 text-white font-semibold rounded-xl shadow">EMERGENCY SOS</button>
+              {/* ✅ Use the existing red button for navigation */}
+              <button
+                onClick={goToAccountTab}
+                className="w-full py-3 bg-red-600 text-white font-semibold rounded-xl shadow"
+              >
+                EMERGENCY SOS
+              </button>
 
               <div className="text-sm flex justify-between">
                 <span className="text-muted-foreground">Safety Score</span>
