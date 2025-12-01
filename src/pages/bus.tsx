@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Input } from "@/components/ui/input"; // Re-import Input for the custom search bar
 import Map from "@/components/map";
 import TestimonialsSection from "@/components/home/testimonialsSection";
 import FaqSection from "@/components/home/faqSection";
