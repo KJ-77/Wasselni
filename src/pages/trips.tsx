@@ -1,50 +1,69 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, Calendar, Users, ArrowRight } from "lucide-react";
+import { MapPin, Calendar, Users } from "lucide-react";
 import { motion } from "framer-motion";
 
-// Mock Data for Touristic Trips
+// Mock Data for Touristic Trips (Enriched)
 const touristicTrips = [
   {
     id: "trip-001",
     title: "Historical Journey Through North Lebanon",
     coverImage: "https://images.unsplash.com/photo-1588263385312-d3b234d8b48b?q=80&w=2070&auto=format&fit=crop",
-    stops: ["Byblos Citadel", "Our Lady of Nourieh", "Batroun Old Souk"],
+    stops: ["Byblos Citadel", "Our Lady of Nourieh", "Batroun Old Souk", "Tripoli Citadel"],
     date: "2025-12-20",
     price: 35,
     seats: 15,
+    driverName: "Ahmad M.",
+    driverAvatar: "https://randomuser.me/api/portraits/men/32.jpg",
+    description: "Embark on a breathtaking journey through the historical heart of North Lebanon. We'll explore ancient citadels, serene monasteries, and the vibrant old souks that tell the story of a thousand years."
   },
   {
     id: "trip-002",
     title: "Bekaa Valley: Wine & Ancient Ruins",
     coverImage: "https://images.unsplash.com/photo-1547494590-7f7222b10d0f?q=80&w=1974&auto=format&fit=crop",
-    stops: ["Baalbek Ruins", "Chateau Ksara", "Anjar Citadel"],
+    stops: ["Baalbek Ruins", "Chateau Ksara", "Anjar Citadel", "Our Lady of Zahle"],
     date: "2025-12-22",
     price: 45,
     seats: 20,
+    driverName: "Lara H.",
+    driverAvatar: "https://randomuser.me/api/portraits/women/44.jpg",
+    description: "Indulge your senses in the Bekaa Valley. Stand in awe of the magnificent Baalbek ruins, savor world-renowned Lebanese wine at Chateau Ksara, and uncover the unique history of the Anjar Citadel."
   },
   {
     id: "trip-003",
     title: "Shouf Mountains: Cedars & Palaces",
     coverImage: "https://images.unsplash.com/photo-1627993418525-29e24f54519c?q=80&w=2070&auto=format&fit=crop",
-    stops: ["Deir el Qamar", "Beiteddine Palace", "Shouf Cedar Reserve"],
+    stops: ["Deir el Qamar", "Beiteddine Palace", "Shouf Cedar Reserve", "Moussa Castle"],
     date: "2025-12-25",
     price: 30,
     seats: 18,
+    driverName: "Karim S.",
+    driverAvatar: "https://randomuser.me/api/portraits/men/36.jpg",
+    description: "Escape to the tranquil beauty of the Shouf Mountains. Wander through the historic village of Deir el Qamar, marvel at the intricate architecture of Beiteddine Palace, and walk among the ancient trees of the Shouf Cedar Reserve."
   },
    {
     id: "trip-004",
     title: "Southern Wonders: Sidon & Tyre",
     coverImage: "https://images.unsplash.com/photo-1629013028682-74d39c342f22?q=80&w=2062&auto=format&fit=crop",
-    stops: ["Sidon Sea Castle", "Tyre Roman Hippodrome", "Qana Grotto"],
+    stops: ["Sidon Sea Castle", "Tyre Roman Hippodrome", "Qana Grotto", "Tyre Beach"],
     date: "2025-12-28",
     price: 40,
     seats: 22,
+    driverName: "Maya R.",
+    driverAvatar: "https://randomuser.me/api/portraits/women/50.jpg",
+    description: "Discover the coastal treasures of South Lebanon. Explore the formidable Sidon Sea Castle, walk through the sprawling Roman ruins of Tyre, and visit the sacred grotto of Qana."
   },
 ];
 
+
 export function TripsPage() {
+    const navigate = useNavigate();
+
+    const handleOfferTripClick = () => {
+        navigate('/offerTouristicTrips');
+    };
+
   return (
     <div className="flex flex-col bg-slate-50 dark:bg-slate-950">
       {/* Hero Section */}
@@ -73,8 +92,8 @@ export function TripsPage() {
             transition={{ duration: 0.5, delay: 0.4 }}
              className="mt-8"
            >
-            <Button asChild size="lg">
-              <Link to="/offer-touristic-trips">Become a Trip Leader</Link>
+            <Button size="lg" onClick={handleOfferTripClick}>
+                Become a Trip Leader
             </Button>
           </motion.div>
         </div>
@@ -110,13 +129,18 @@ export function TripsPage() {
                     <span>{trip.seats} Seats Available</span>
                   </div>
                 </CardContent>
-                <CardFooter className="flex items-center justify-between bg-slate-100 dark:bg-slate-900 p-4">
+                <CardFooter className="flex flex-col items-start gap-4 bg-slate-100 dark:bg-slate-900 p-4">
                     <div className="text-2xl font-bold text-primary">${trip.price} <span className="text-sm font-normal text-muted-foreground">/ seat</span></div>
-                    <Button asChild>
-                        <Link to={`/trips/${trip.id}`}>
-                            View Details <ArrowRight className="h-4 w-4 ml-2"/>
-                        </Link>
-                    </Button>
+                    <div className="w-full flex flex-col gap-2">
+                         <Button asChild className="w-full">
+                            <Link to={`/tripBookingPage/${trip.id}`}>Book Your Seat Now</Link>
+                        </Button>
+                        <Button asChild variant="link" className="p-0 h-auto">
+                            <Link to={`/trips/${trip.id}`}>
+                                View Details
+                            </Link>
+                        </Button>
+                    </div>
                 </CardFooter>
               </Card>
             </motion.div>

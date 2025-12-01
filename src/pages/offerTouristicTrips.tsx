@@ -9,7 +9,17 @@ import { X, PlusCircle } from "lucide-react";
 import { toast } from "sonner";
 
 
-const initialState = {
+type TripData = {
+    title: string;
+    description: string;
+    coverImageUrl: string;
+    date: string;
+    seats: number;
+    price: number;
+    stops: string[];
+};
+
+const initialState: TripData = {
     title: "",
     description: "",
     coverImageUrl: "",
@@ -20,12 +30,18 @@ const initialState = {
 };
 
 export function OfferTouristicTripsPage() {
-    const [tripData, setTripData] = React.useState(initialState);
+    const [tripData, setTripData] = React.useState<TripData>(initialState);
     const [newStop, setNewStop] = React.useState("");
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { id, value } = e.target;
-        setTripData(prev => ({ ...prev, [id]: value }));
+        // Coerce numeric fields
+        if (id === 'seats' || id === 'price') {
+            const num = Number(value);
+            setTripData(prev => ({ ...prev, [id]: isNaN(num) ? 0 : num } as unknown as TripData));
+            return;
+        }
+        setTripData(prev => ({ ...prev, [id]: value } as unknown as TripData));
     };
 
     const handleAddStop = () => {

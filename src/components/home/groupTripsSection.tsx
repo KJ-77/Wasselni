@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, Clock, Users, Landmark, Library, Mountain, Home } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 type Trip = {
   id: string;
@@ -71,6 +72,14 @@ const DESTINATIONS = [
 ];
 
 export default function GroupTripsSection() {
+    const navigate = useNavigate();
+
+  const handleBook = (trip: Trip) => {
+    navigate("/tripBookingPage", { state: { trip } });
+  };
+  const handleDestination = () => {
+    navigate("/trips");
+  }
   return (
     <section className="w-full py-14 px-6">
       <div className="max-w-7xl mx-auto">
@@ -175,13 +184,14 @@ export default function GroupTripsSection() {
                     </div>
 
                     <div className="mt-6">
-                      <Button
+                        <Button
                         className="w-full rounded-full"
                         style={{
                           background: "var(--brand-gradient)",
                           color: "var(--primary-foreground)",
                           boxShadow: "0 8px 28px rgba(2,6,23,0.08)",
                         }}
+                        onClick={() => handleBook(trip)} 
                       >
                         Book Trip
                       </Button>
@@ -243,7 +253,9 @@ export default function GroupTripsSection() {
               style={{
                 background: "var(--brand-gradient)",
                 color: "var(--primary-foreground)",
+                
               }}
+              onClick={handleDestination}
             >
               View All Destinations
             </Button>
