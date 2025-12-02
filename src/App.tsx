@@ -12,6 +12,7 @@ import RatingsReceived from "./pages/dashboard/ratingsReceived";
 import RatingsGiven from "./pages/dashboard/ratingsGiven";
 import Ratings from "./pages/dashboard/ratings";
 import SiteFooter from "./components/siteFooter";
+import Auth from './pages/auth';
 
 
 
@@ -32,6 +33,7 @@ const App = () => {
           <Route path="/dashboard/ratingsReceived" element={<RatingsReceived />} />
           <Route path="/dashboard/ratingsGiven" element={<RatingsGiven />} />
           <Route path="/dashboard/ratings" element={<Ratings />} />
+          <Route path="/auth" element={<Auth />} />
           {/* <Route path="/*" element={<NotFoundPage />} /> */}
         </Routes>
         <SiteFooter />
