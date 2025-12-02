@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useEffect, useState, useRef } from "react";
-import { BookOpenIcon, InfoIcon, LifeBuoyIcon } from "lucide-react";
+import { BookOpenIcon, InfoIcon, LifeBuoyIcon, User, Settings, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
@@ -16,10 +16,28 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import type {} from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ModeToggle } from "@/components/mode-toggle";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Simple logo component for the navbar
 const Logo = (props: React.SVGAttributes<SVGElement>) => {
@@ -173,9 +191,9 @@ export const Navbar02 = React.forwardRef<HTMLElement, Navbar02Props>(
       logoHref = "/",
       navigationLinks = defaultNavigationLinks,
       signInText = "Sign In",
-      signInHref = "/auth/signin",
+      signInHref = "/auth",
       ctaText = "Get Started",
-      ctaHref = "/auth/signup",
+      ctaHref = "/auth",
       onNavItemClick,
       onSignInClick,
       onCtaClick,
@@ -184,7 +202,32 @@ export const Navbar02 = React.forwardRef<HTMLElement, Navbar02Props>(
     ref
   ) => {
     const [isMobile, setIsMobile] = useState(false);
+    const [showLogoutDialog, setShowLogoutDialog] = useState(false);
     const containerRef = useRef<HTMLElement>(null);
+    const auth = useAuth();
+    const navigate = useNavigate();
+
+    // Get user initials for avatar fallback
+    const getUserInitials = () => {
+      if (auth.userAttributes?.name) {
+        return auth.userAttributes.name
+          .split(' ')
+          .map(n => n[0])
+          .join('')
+          .toUpperCase()
+          .slice(0, 2);
+      }
+      if (auth.userAttributes?.email) {
+        return auth.userAttributes.email.slice(0, 2).toUpperCase();
+      }
+      return 'U';
+    };
+
+    const handleLogout = () => {
+      auth.signOut();
+      navigate('/');
+      setShowLogoutDialog(false);
+    };
 
     useEffect(() => {
       const checkWidth = () => {
@@ -461,32 +504,138 @@ export const Navbar02 = React.forwardRef<HTMLElement, Navbar02Props>(
               )}
             </div>
           </div>
-          {/* Right side sign in*/}
+          {/* Right side - conditional rendering based on auth state */}
           <div className="flex items-center gap-3">
-          <ModeToggle />
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-              onClick={(e) => {
-                e.preventDefault();
-                if (onSignInClick) onSignInClick();
-              }}
-            >
-              {signInText}
-            </Button>
-            <Button
-              size="sm"
-              className="text-sm font-medium px-4 h-9 rounded-md shadow-sm"
-              onClick={(e) => {
-                e.preventDefault();
-                if (onCtaClick) onCtaClick();
-              }}
-            >
-              {ctaText}
-            </Button>
+            <ModeToggle />
+
+            {auth.isLoading ? (
+              // Loading state
+              <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
+            ) : auth.isAuthenticated ? (
+              // Authenticated user UI
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+                  onClick={() => setShowLogoutDialog(true)}
+                >
+                  Logout
+                </Button>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="relative h-9 w-9 rounded-full"
+                    >
+                      <Avatar className="h-9 w-9">
+                        <AvatarImage
+                          src={auth.userAttributes?.picture}
+                          alt={auth.userAttributes?.name || 'User'}
+                        />
+                        <AvatarFallback className="bg-primary text-primary-foreground">
+                          {getUserInitials()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">
+                          {auth.userAttributes?.name || 'User'}
+                        </p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                          {auth.userAttributes?.email}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => navigate('/dashboard/profile')}
+                      className="cursor-pointer"
+                    >
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => navigate('/dashboard/settings')}
+                      className="cursor-pointer"
+                    >
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Settings</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => setShowLogoutDialog(true)}
+                      className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Log out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              // Guest user UI (not authenticated)
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (onSignInClick) onSignInClick();
+                  }}
+                >
+                  <Link to={signInHref}>
+                    {signInText}
+                  </Link>
+                </Button>
+
+                <Button
+                  size="sm"
+                  className="text-sm font-medium px-4 h-9 rounded-md shadow-sm"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (onCtaClick) onCtaClick();
+                  }}
+                >
+                  <Link to={ctaHref}>
+                    {ctaText}
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
+
+        {/* Logout Confirmation Dialog */}
+        <Dialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Log out of your account?</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to log out? You'll need to sign in again to access your account.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button
+                variant="outline"
+                onClick={() => setShowLogoutDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleLogout}
+              >
+                Log out
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </header>
     );
   }
