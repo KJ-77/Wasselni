@@ -62,7 +62,7 @@ const rides: Ride[] = [
 
 const Home = () => {
   return (
-    <div className="w-full pt-7">
+    <div className="w-full">
       {/* HERO */}
       <div
         className="relative flex items-center justify-center w-full min-h-[28rem] bg-cover bg-center bg-no-repeat"

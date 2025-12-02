@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { CognitoUserPool, CognitoUserAttribute, CognitoUser } from 'amazon-cognito-identity-js';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -16,6 +16,7 @@ const userPool = new CognitoUserPool(cognitoPoolConfig);
 const Auth = () => {
   const auth = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Form state
   const [activeTab, setActiveTab] = useState('signin');
@@ -57,8 +58,9 @@ const Auth = () => {
 
     try {
       await auth.signIn(signInEmail, signInPassword);
-      // Success! Navigate to home
-      navigate('/');
+      // Success! Redirect to page they tried to access, or home
+      const from = location.state?.from?.pathname || '/';
+      navigate(from, { replace: true });
     } catch (err: any) {
       setError(err.message || 'Sign in failed');
     }

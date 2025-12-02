@@ -11,6 +11,8 @@ interface AuthContextType {
   isLoading: boolean;
   user: CognitoUser | null;
   userAttributes: Record<string, string> | null;
+  userGroups: string[];
+  hasRole: (role: string) => boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => void;
   error: string | null;
@@ -25,7 +27,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<CognitoUser | null>(null);
   const [userAttributes, setUserAttributes] = useState<Record<string, string> | null>(null);
+  const [userGroups, setUserGroups] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  // Helper function to extract groups from session
+  const extractGroups = (session: CognitoUserSession): string[] => {
+    const idToken = session.getIdToken();
+    const payload = idToken.payload;
+    return payload['cognito:groups'] || [];
+  };
 
   // Check if user is already authenticated on mount
   useEffect(() => {
@@ -41,6 +51,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (session && session.isValid()) {
           setUser(currentUser);
           setIsAuthenticated(true);
+          setUserGroups(extractGroups(session));
 
           // Get user attributes
           currentUser.getUserAttributes((err, attributes) => {
@@ -85,6 +96,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           console.log('Authentication successful:', session);
           setUser(cognitoUser);
           setIsAuthenticated(true);
+          setUserGroups(extractGroups(session));
 
           // Get user attributes
           cognitoUser.getUserAttributes((err, attributes) => {
@@ -127,8 +139,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
     setUser(null);
     setUserAttributes(null);
+    setUserGroups([]);
     setIsAuthenticated(false);
     setError(null);
+  };
+
+  // Helper function to check if user has a specific role
+  const hasRole = (role: string): boolean => {
+    return userGroups.includes(role);
   };
 
   const value = {
@@ -136,6 +154,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     isLoading,
     user,
     userAttributes,
+    userGroups,
+    hasRole,
     signIn,
     signOut,
     error,
