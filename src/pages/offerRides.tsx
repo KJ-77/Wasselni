@@ -27,24 +27,28 @@ export default function OfferRidesPage() {
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      className="w-full min-h-screen bg-gradient-to-br from-background via-background to-muted/20 pt-24 pb-16"
+      className="w-full min-h-screen bg-gradient-to-br from-background via-background to-muted/20 pt-20 pb-12"
     >
-      <div className="max-w-6xl mx-auto px-4">
-        <motion.div variants={itemVariants} className="mb-12 text-center">
+      <div className="max-w-6xl">
+        <motion.div variants={itemVariants} className=" mx-auto px-80">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             Offer a Ride
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-l text-muted-foreground ">
             Share your journey and help others reach their destination. Earn money while making new connections.
           </p>
         </motion.div>
 
-       
+      </div>
 
-        <motion.div variants={itemVariants}>
+
+      <div className="w-full flex justify-center">
+         <motion.div variants={itemVariants}>
           <Wizard />
         </motion.div>
       </div>
+
+
     </motion.div>
   );
 }

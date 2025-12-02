@@ -1,25 +1,109 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Stepper from "./stepper";
-import Step1CarDetails from "./steps/step1CarDetails";
-import Step2DriverInfo from "./steps/step2DriverInfo";
-import Step3Payment from "./steps/step3Payment";
-import Step4Summary from "./steps/step4Summary";
+import Step1RouteDetails from "./steps/step1RouteDetails";
+import Step2VehicleAndPricing from "./steps/step2VehicleAndPricing";
+import Step3Preferences from "./steps/step3Preferences";
+import Step4ReviewAndPublish from "./steps/step4ReviewAndPublish";
 import { validateAll } from "./steps/validation";
-import { WizardData } from "./steps/types";
+import { WizardData, Vehicle } from "./steps/types";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
+import AddVehicleModal from "../AddVehicleModal";
 
 export default function Wizard() {
   const navigate = useNavigate();
+  // Lightweight fallback toast replacement while a project-wide toast isn't available
+  const toast = (opts: { title?: string; description?: string; variant?: string }) => {
+    if (opts.variant === "destructive") {
+      // destructives show a blocking alert for now
+      // eslint-disable-next-line no-alert
+      alert(`${opts.title || ""}\n${opts.description || ""}`);
+    } else {
+      // non-destructive just log
+      console.log("Toast:", opts.title, opts.description);
+    }
+  };
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  
+
+  const [vehicles, setVehicles] = useState<Vehicle[]>([
+    {
+        id: 1,
+        make: 'BMW',
+        model: 'X3',
+        year: 2020,
+        color: 'Black',
+        plate: 'ABC 123',
+        type: 'suv',
+        capacity: 5,
+        photo: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23334155" width="200" height="200"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="60" fill="%23fff"%3E🚙%3C/text%3E%3C/svg%3E',
+        verified: true
+    },
+    {
+        id: 2,
+        make: 'Toyota',
+        model: 'Camry',
+        year: 2019,
+        color: 'White',
+        plate: 'XYZ 789',
+        type: 'sedan',
+        capacity: 5,
+        photo: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23e5e7eb" width="200" height="200"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="60" fill="%23374151"%3E🚗%3C/text%3E%3C/svg%3E',
+        verified: true
+    }
+  ]);
+  const [isAddVehicleModalOpen, setIsAddVehicleModalOpen] = useState(false);
+
+  const handleAddVehicle = (newVehicleData: Omit<Vehicle, 'id' | 'verified'>) => {
+    const newVehicle: Vehicle = {
+      ...newVehicleData,
+      id: vehicles.length > 0 ? Math.max(...vehicles.map(v => Number(v.id))) + 1 : 1,
+      verified: false, // New vehicles are pending verification
+    };
+    setVehicles(prev => [...prev, newVehicle]);
+    // Optionally, automatically select the new vehicle
+    setData(prev => ({...prev, vehicleAndPricing: {...prev.vehicleAndPricing, selectedVehicleId: newVehicle.id}}));
+    toast({
+        title: "Vehicle Added",
+        description: `${newVehicle.make} ${newVehicle.model} has been registered.`,
+    });
+  };
+
 
   const [data, setData] = useState<WizardData>({
-    car: { brand: "", model: "", year: "" },
-    driver: { fullName: "", phone: "" },
-    payment: { method: "", cardNumber: "" },
+    routeDetails: {
+      departureCity: "",
+      departureAddress: "",
+      arrivalCity: "",
+      arrivalAddress: "",
+      departureDate: "",
+      departureTime: "",
+      isRoundTrip: false,
+      returnDate: "",
+      returnTime: "",
+      stops: [],
+    },
+    vehicleAndPricing: {
+      selectedVehicleId: null,
+      availableSeats: 0,
+      pricePerSeat: 0,
+    },
+    preferences: {
+      amenities: [],
+      instantBooking: false,
+      womenOnly: false,
+      verifiedOnly: false,
+      minRating: 0,
+      additionalNotes: "",
+    },
+    publishing: {
+      featuredRide: false,
+      recurringRide: false,
+      agreeTerms: false,
+    },
   });
 
   const steps = [
@@ -31,45 +115,73 @@ export default function Wizard() {
 
   const next = () => {
     if (validateAll[currentStep] && !validateAll[currentStep](data)) {
-      setError("Please fill all required fields.");
+      toast({
+        variant: "destructive",
+        title: "Incomplete Step",
+        description: "Please fill all required fields before continuing.",
+      });
       return;
     }
-    setError(null);
     if (currentStep < 4) setCurrentStep(currentStep + 1);
   };
 
   const back = () => {
-    setError(null);
     if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
   const renderStep = () => {
     switch (currentStep) {
       case 1:
-        return <Step1CarDetails data={data} setData={setData} />;
+        return (
+          <Step1RouteDetails
+            data={data}
+            setData={setData}
+          />
+        );
       case 2:
-        return <Step2DriverInfo data={data} setData={setData} />;
+        return (
+          <Step2VehicleAndPricing
+            data={data}
+            setData={setData}
+            vehicles={vehicles}
+            onOpenAddVehicleModal={() => setIsAddVehicleModalOpen(true)}
+          />
+        );
       case 3:
-        return <Step3Payment data={data} setData={setData} />;
+        return (
+          <Step3Preferences
+            data={data}
+            setData={setData}
+          />
+        );
       case 4:
-        return <Step4Summary data={data} setData={setData} />;
+        return (
+          <Step4ReviewAndPublish
+            data={data}
+            setData={setData}
+            vehicles={vehicles}
+          />
+        );
     }
   };
 
-  const getStepTitle = () => {
-    const titles: Record<number, string> = {
-      1: "Where are you going?",
-      2: "Tell us about your vehicle",
-      3: "Driver Information",
-      4: "Review & Publish"
-    };
-    return titles[currentStep] || "";
-  };
+  
 
   const submit = async () => {
-    setError(null);
+    if (!validateAll[4](data)) {
+      toast({
+        variant: "destructive",
+        title: "Terms and Conditions",
+        description: "You must agree to the terms and conditions to publish a ride.",
+      });
+      return;
+    }
     if (!validateAll[1](data) || !validateAll[2](data) || !validateAll[3](data)) {
-      setError("Please complete all steps before submitting.");
+        toast({
+            variant: "destructive",
+            title: "Incomplete Form",
+            description: "Please complete all previous steps before submitting.",
+        });
       return;
     }
     setLoading(true);
@@ -81,13 +193,21 @@ export default function Wizard() {
       });
       if (!res.ok) throw new Error("Failed to save ride");
       const body = await res.json();
+      toast({
+        title: "Ride Published!",
+        description: "Your ride is now visible to passengers.",
+      });
       console.log("Ride created:", body);
       setTimeout(() => {
         navigate("/rides");
       }, 1000);
     } catch (err) {
       console.error(err);
-      setError(err instanceof Error ? err.message : "Failed to submit ride. Please try again.");
+      toast({
+          variant: "destructive",
+          title: "Submission Failed",
+          description: err instanceof Error ? err.message : "Failed to submit ride. Please try again.",
+      });
     } finally {
       setLoading(false);
     }
@@ -98,9 +218,11 @@ export default function Wizard() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="max-w-2xl mx-auto py-6 space-y-8"
+      className="w-full mx-auto py-6 space-y-5 flex flex-col items-center px-10"
     >
-      <Stepper steps={steps} currentStep={currentStep} />
+      <div className="w-full flex justify-center">
+        <Stepper steps={steps} currentStep={currentStep} />
+      </div>
 
       <AnimatePresence mode="wait">
         <motion.div
@@ -109,29 +231,27 @@ export default function Wizard() {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.3 }}
+          className="w-full flex justify-center"
         >
-          <div className="mb-6">
+          {/* <div className="mb-6">
             <h2 className="text-2xl font-semibold mb-2">{getStepTitle()}</h2>
             <p className="text-muted-foreground">Step {currentStep} of 4</p>
-          </div>
-          <div className="p-6 border rounded-xl shadow-sm bg-card">
-            {renderStep()}
+          </div> */}
+
+
+
+
+{/* MAIN container that calls the steps */}
+
+          <div className="w-full flex justify-center ">
+            <div className="w-full max-w-[96rem]">{/* card container set to very large (8XL-like) */}
+              {renderStep()}
+            </div>
           </div>
         </motion.div>
       </AnimatePresence>
 
-      <AnimatePresence>
-        {error && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="p-4 border border-red-500 bg-red-50 text-red-700 rounded-lg text-sm"
-          >
-            {error}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      
 
       {loading && (
         <motion.div
@@ -143,43 +263,65 @@ export default function Wizard() {
           <motion.div
             animate={{ scale: [1, 1.05, 1] }}
             transition={{ repeat: Infinity, duration: 1.5 }}
-            className="bg-white rounded-lg p-6 shadow-lg"
+            className=" rounded-lg p-6 shadow-lg"
           >
             <p className="font-semibold">Creating your ride...</p>
           </motion.div>
         </motion.div>
       )}
 
-      <div className="flex justify-between gap-4">
-        <Button
-          variant="secondary"
-          onClick={back}
-          disabled={currentStep === 1 || loading}
-          className="flex-1"
-        >
-          Back
-        </Button>
 
-        {currentStep < 4 ? (
-          <Button onClick={next} disabled={loading} className="flex-1">
-            Next
-          </Button>
-        ) : (
-          <motion.div
-            className="flex-1"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <Button
-              onClick={submit}
-              className="w-full bg-green-600 hover:bg-green-700 text-white"
-              disabled={loading}
-            >
-              {loading ? "Publishing..." : "Finish & Publish"}
-            </Button>
-          </motion.div>
-        )}
+          {currentStep > 1 && (
+            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+              <Button variant="secondary" onClick={back} disabled={loading}>
+                Back
+              </Button>
+            </motion.div>
+          )}
+        
+      <div className="w-full max-w-[96rem] flex justify-between items-center pt-4">
+        <AnimatePresence>
+          {currentStep > 1 && (
+            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+              <Button variant="secondary" onClick={back} disabled={loading}>
+                Back
+              </Button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence mode="wait">
+          {currentStep < 4 ? (
+            <motion.div key="next" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}>
+              <Button onClick={next} disabled={loading}>
+                Next
+              </Button>
+            </motion.div>
+          ) : (
+            <motion.div key="publish" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-2xl ml-4">
+                 <Card className="bg-gradient-to-r from-blue-600 to-green-600 border-0">
+                    <div className="p-6 flex items-center justify-between">
+                        <div className="text-white">
+                            <h4 className="text-lg font-semibold mb-1">Ready to publish your ride?</h4>
+                            <p className="text-sm text-white/90">Your ride will be visible to passengers immediately.</p>
+                        </div>
+                        <Button onClick={submit} disabled={loading || !data.publishing.agreeTerms} size="lg" className="bg-white text-foreground hover:bg-gray-200">
+                             {loading ? "Publishing..." : "Finish & Publish"}
+                        </Button>
+                    </div>
+                </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
+
+      <AddVehicleModal
+        isOpen={isAddVehicleModalOpen}
+        onOpenChange={setIsAddVehicleModalOpen}
+        onVehicleAdd={handleAddVehicle}
+      />
     </motion.div>
   );
 }
+
+
