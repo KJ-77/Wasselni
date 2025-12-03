@@ -2,14 +2,17 @@
 export interface Stop {
   id: number;
   location: string;
+  coordinates?: { lat: number; lng: number };
 }
 
 // Step 1: Route Details
 export interface RouteDetails {
   departureCity: string;
   departureAddress: string;
+  departureCoordinates?: { lat: number; lng: number };
   arrivalCity: string;
   arrivalAddress: string;
+  arrivalCoordinates?: { lat: number; lng: number };
   departureDate: string;
   departureTime: string;
   isRoundTrip: boolean;

@@ -1,78 +1,87 @@
-import { WizardData } from "./types";
+import { WizardData, Stop } from "./types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, X, MapPin, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import "leaflet/dist/leaflet.css";
-import { MapContainer as LeafletMapContainer, TileLayer, Marker, useMapEvents, Polyline } from "react-leaflet";
-import L from "leaflet";
-
-// Leaflet's default icon breaks with React, so we fix it
-const defaultIcon = L.icon({
-  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-});
-L.Marker.prototype.options.icon = defaultIcon;
+import { AddressAutocomplete } from "@/components/AddressAutocomplete";
+import MapboxMap from "@/components/map";
+import { AutocompleteResponse } from "@/services/MapService";
 
 interface Props {
   data: WizardData;
   setData: (data: WizardData) => void;
 }
 
-// Map component that handles map events
-type MapEventsProps = {
-  onMapClick: (latlng: L.LatLng) => void;
-};
-
-function MapEvents({ onMapClick }: MapEventsProps) {
-  useMapEvents({
-    click(e) {
-      onMapClick(e.latlng);
-    },
-  });
-  return null;
-}
-
 export default function Step1RouteDetails({ data, setData }: Props) {
   const { routeDetails } = data;
-  const [isClient, setIsClient] = useState(false);
 
-  const [departureMarker, setDepartureMarker] = useState<L.LatLng | null>(null);
-  const [destinationMarker, setDestinationMarker] = useState<L.LatLng | null>(null);
+  const handlePlaceSelect = (field: "departure" | "arrival", place: AutocompleteResponse) => {
+    const city = place.address;
+    const coordinates = { lat: place.lat, lng: place.lng };
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  const handleMapClick = (latlng: L.LatLng) => {
-    if (!departureMarker) {
-      setDepartureMarker(latlng);
-      // In a real app, you'd use a geocoding service here
-      setData({ ...data, routeDetails: { ...routeDetails, departureCity: `Lat: ${latlng.lat.toFixed(2)}` }});
-    } else if (!destinationMarker) {
-      setDestinationMarker(latlng);
-      setData({ ...data, routeDetails: { ...routeDetails, arrivalCity: `Lat: ${latlng.lat.toFixed(2)}` }});
-    }
-  };
-
-  const clearMap = () => {
-    setDepartureMarker(null);
-    setDestinationMarker(null);
-  };
-
-  const handleAddStop = () => {
-    if (routeDetails.stops.length < 3) {
-      const newStop = { id: Date.now(), location: "" };
+    if (field === "departure") {
       setData({
         ...data,
         routeDetails: {
           ...routeDetails,
-          stops: [...routeDetails.stops, newStop],
+          departureCity: city,
+          departureCoordinates: coordinates,
+        },
+      });
+    } else {
+      setData({
+        ...data,
+        routeDetails: {
+          ...routeDetails,
+          arrivalCity: city,
+          arrivalCoordinates: coordinates,
+        },
+      });
+    }
+  };
+
+  const handleSpecificPlaceSelect = (field: "departure" | "arrival", place: AutocompleteResponse) => {
+    const address = place.address;
+    const coordinates = { lat: place.lat, lng: place.lng };
+
+    if (field === "departure") {
+      setData({
+        ...data,
+        routeDetails: {
+          ...routeDetails,
+          departureAddress: address,
+          departureCoordinates: coordinates,
+        },
+      });
+    } else {
+      setData({
+        ...data,
+        routeDetails: {
+          ...routeDetails,
+          arrivalAddress: address,
+          arrivalCoordinates: coordinates,
+        },
+      });
+    }
+  };
+
+  const updateField = (field: keyof typeof routeDetails, value: string | boolean | Stop[]) => {
+    setData({
+      ...data,
+      routeDetails: { ...routeDetails, [field]: value },
+    });
+  };
+
+  const handleAddStop = () => {
+    if ((routeDetails.stops?.length || 0) < 3) {
+      const newStop: Stop = { id: Date.now(), location: "" };
+      setData({
+        ...data,
+        routeDetails: {
+          ...routeDetails,
+          stops: [...(routeDetails.stops || []), newStop],
         },
       });
     }
@@ -83,14 +92,21 @@ export default function Step1RouteDetails({ data, setData }: Props) {
       ...data,
       routeDetails: {
         ...routeDetails,
-        stops: routeDetails.stops.filter((stop) => stop.id !== id),
+        stops: (routeDetails.stops || []).filter((stop) => stop.id !== id),
       },
     });
   };
 
-  const handleStopChange = (id: number, value: string) => {
-    const updatedStops = routeDetails.stops.map((stop) =>
-      stop.id === id ? { ...stop, location: value } : stop
+
+  const handleStopPlaceSelect = (id: number, place: AutocompleteResponse) => {
+    const updatedStops = (routeDetails.stops || []).map((stop) =>
+      stop.id === id 
+        ? { 
+            ...stop, 
+            location: place.address,
+            coordinates: { lat: place.lat, lng: place.lng }
+          } 
+        : stop
     );
     setData({
       ...data,
@@ -98,10 +114,14 @@ export default function Step1RouteDetails({ data, setData }: Props) {
     });
   };
 
-  const updateField = (field: keyof typeof routeDetails, value: any) => {
+  const clearMap = () => {
     setData({
       ...data,
-      routeDetails: { ...routeDetails, [field]: value },
+      routeDetails: {
+        ...routeDetails,
+        departureCoordinates: undefined,
+        arrivalCoordinates: undefined,
+      },
     });
   };
 
@@ -116,21 +136,35 @@ export default function Step1RouteDetails({ data, setData }: Props) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="departureCity">Departure City *</Label>
-            <Input id="departureCity" placeholder="e.g., Beirut" value={routeDetails.departureCity} onChange={(e) => updateField("departureCity", e.target.value)} />
+            <AddressAutocomplete
+              onPlaceSelected={(place) => handlePlaceSelect("departure", place)}
+              defaultValue={routeDetails.departureCity || ""}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="departureAddress">Specific Location</Label>
-            <Input id="departureAddress" placeholder="e.g., Hamra Street" value={routeDetails.departureAddress} onChange={(e) => updateField("departureAddress", e.target.value)} />
+            <AddressAutocomplete
+              onPlaceSelected={(place) => handleSpecificPlaceSelect("departure", place)}
+              defaultValue={routeDetails.departureAddress || ""}
+              placeholder="e.g., Hamra Street"
+            />
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="arrivalCity">Destination City *</Label>
-            <Input id="arrivalCity" placeholder="e.g., Tripoli" value={routeDetails.arrivalCity} onChange={(e) => updateField("arrivalCity", e.target.value)} />
+            <AddressAutocomplete
+              onPlaceSelected={(place) => handlePlaceSelect("arrival", place)}
+              defaultValue={routeDetails.arrivalCity || ""}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="arrivalAddress">Specific Location</Label>
-            <Input id="arrivalAddress" placeholder="e.g., City Center" value={routeDetails.arrivalAddress} onChange={(e) => updateField("arrivalAddress", e.target.value)} />
+            <AddressAutocomplete
+              onPlaceSelected={(place) => handleSpecificPlaceSelect("arrival", place)}
+              defaultValue={routeDetails.arrivalAddress || ""}
+              placeholder="e.g., City Center"
+            />
           </div>
         </div>
         
@@ -138,11 +172,21 @@ export default function Step1RouteDetails({ data, setData }: Props) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="departureDate">Departure Date *</Label>
-            <Input id="departureDate" type="date" value={routeDetails.departureDate} onChange={(e) => updateField("departureDate", e.target.value)} />
+            <Input 
+              id="departureDate" 
+              type="date" 
+              value={routeDetails.departureDate || ""} 
+              onChange={(e) => updateField("departureDate", e.target.value)} 
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="departureTime">Departure Time *</Label>
-            <Input id="departureTime" type="time" value={routeDetails.departureTime} onChange={(e) => updateField("departureTime", e.target.value)} />
+            <Input 
+              id="departureTime" 
+              type="time" 
+              value={routeDetails.departureTime || ""} 
+              onChange={(e) => updateField("departureTime", e.target.value)} 
+            />
           </div>
         </div>
 
@@ -153,7 +197,10 @@ export default function Step1RouteDetails({ data, setData }: Props) {
                     <h4 className="font-medium">Round Trip</h4>
                     <p className="text-sm text-muted-foreground">Offer a return journey</p>
                 </div>
-                <Checkbox checked={routeDetails.isRoundTrip} onCheckedChange={(checked: boolean) => updateField("isRoundTrip", checked)} />
+                <Checkbox 
+                  checked={routeDetails.isRoundTrip || false} 
+                  onCheckedChange={(checked: boolean) => updateField("isRoundTrip", checked)} 
+                />
             </div>
         </Card>
 
@@ -163,11 +210,21 @@ export default function Step1RouteDetails({ data, setData }: Props) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                         <Label htmlFor="returnDate">Return Date *</Label>
-                        <Input id="returnDate" type="date" value={routeDetails.returnDate} onChange={(e) => updateField("returnDate", e.target.value)} />
+                        <Input 
+                          id="returnDate" 
+                          type="date" 
+                          value={routeDetails.returnDate || ""} 
+                          onChange={(e) => updateField("returnDate", e.target.value)} 
+                        />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="returnTime">Return Time *</Label>
-                        <Input id="returnTime" type="time" value={routeDetails.returnTime} onChange={(e) => updateField("returnTime", e.target.value)} />
+                        <Input 
+                          id="returnTime" 
+                          type="time" 
+                          value={routeDetails.returnTime || ""} 
+                          onChange={(e) => updateField("returnTime", e.target.value)} 
+                        />
                     </div>
                 </div>
             </div>
@@ -177,16 +234,29 @@ export default function Step1RouteDetails({ data, setData }: Props) {
         <div>
           <Label className="mb-2 block">Additional Stops (Optional)</Label>
           <div className="space-y-3">
-            {routeDetails.stops.map((stop, index) => (
+            {routeDetails.stops && routeDetails.stops.map((stop, index) => (
               <div key={stop.id} className="flex items-center space-x-2">
-                <Input placeholder={`Stop ${index + 1} location`} value={stop.location} onChange={(e) => handleStopChange(stop.id, e.target.value)} />
+                <div className="flex-1">
+                  <AddressAutocomplete
+                    onPlaceSelected={(place) => handleStopPlaceSelect(stop.id, place)}
+                    defaultValue={stop.location || ""}
+                    placeholder={`Stop ${index + 1} location`}
+                  />
+                </div>
                 <Button variant="ghost" size="icon" onClick={() => handleRemoveStop(stop.id)}>
                   <X className="h-4 w-4" />
                 </Button>
               </div>
             ))}
           </div>
-          <Button type="button" variant="outline" size="sm" className="mt-3" onClick={handleAddStop} disabled={routeDetails.stops.length >= 3}>
+          <Button 
+            type="button" 
+            variant="outline" 
+            size="sm" 
+            className="mt-3" 
+            onClick={handleAddStop} 
+            disabled={(routeDetails.stops?.length || 0) >= 3}
+          >
             <Plus className="w-4 h-4 mr-2" /> Add Stop
           </Button>
         </div>
@@ -196,8 +266,12 @@ export default function Step1RouteDetails({ data, setData }: Props) {
           <CardHeader>
             <div className="flex items-center justify-between">
                 <div>
-                    <CardTitle className="flex items-center"><MapPin className="w-5 h-5 mr-2 text-wasselni-blue" /> Set Your Route on Map</CardTitle>
-                    <CardDescription className="mt-1">Click on the map to add your departure and destination points</CardDescription>
+                    <CardTitle className="flex items-center">
+                      <MapPin className="w-5 h-5 mr-2 text-blue-600" /> Set Your Route on Map
+                    </CardTitle>
+                    <CardDescription className="mt-1">
+                      Select your departure and arrival locations above to see the route on the map.
+                    </CardDescription>
                 </div>
                 <Button type="button" variant="outline" size="sm" onClick={clearMap}>
                     <Trash2 className="w-4 h-4 mr-2" /> Clear Route
@@ -205,17 +279,11 @@ export default function Step1RouteDetails({ data, setData }: Props) {
             </div>
           </CardHeader>
           <CardContent>
-            {isClient ? (
-                <LeafletMapContainer center={[33.8547, 35.8623]} zoom={9} style={{ height: "400px", width: "100%", borderRadius: "0.5rem", zIndex: 1 }}>
-                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
-                    <MapEvents onMapClick={handleMapClick} />
-                    {departureMarker && <Marker position={departureMarker} />}
-                    {destinationMarker && <Marker position={destinationMarker} />}
-                    {departureMarker && destinationMarker && <Polyline positions={[departureMarker, destinationMarker]} color={"#059669"} dashArray={"10, 10"} />}
-                </LeafletMapContainer>
-            ) : (
-              <div style={{ height: "400px", width: "100%", backgroundColor: "#e0e0e0", display: "flex", alignItems: "center", justifyContent: "center" }}>Loading Map...</div>
-            )}
+            <MapboxMap
+              origin={routeDetails.departureCoordinates}
+              destination={routeDetails.arrivalCoordinates}
+              className="h-[400px] w-full rounded-md"
+            />
           </CardContent>
         </Card>
       </CardContent>

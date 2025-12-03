@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MapPinIcon, SearchIcon, ArrowLeftIcon, ArrowRightIcon, UserIcon } from "lucide-react";
+import { SearchIcon, ArrowLeftIcon, ArrowRightIcon, UserIcon } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import {
   MiniCalendar,
@@ -14,11 +14,15 @@ import {
 } from "@/components/ui/shadcn-io/mini-calendar";
 import { FaCalendarAlt } from "react-icons/fa";
 
+import { AddressAutocomplete } from "@/components/AddressAutocomplete";
+
 function OptionForm() {
   const navigate = useNavigate();
 
   const [departure, setDeparture] = React.useState("");
   const [arrival, setArrival] = React.useState("");
+  const [departurePlace, setDeparturePlace] = React.useState<{ lat: number; lng: number } | null>(null);
+  const [arrivalPlace, setArrivalPlace] = React.useState<{ lat: number; lng: number } | null>(null);
   const [passengers, setPassengers] = React.useState(1);
   const [openDate, setOpenDate] = React.useState(false);
   const [openPassengers, setOpenPassengers] = React.useState(false);
@@ -29,8 +33,10 @@ function OptionForm() {
 
   const handleSearch = () => {
     const params = new URLSearchParams({
-      departure,
-      arrival,
+      departure: departure,
+      arrival: arrival,
+      ...(departurePlace && { from_lat: departurePlace.lat.toString(), from_lng: departurePlace.lng.toString() }),
+      ...(arrivalPlace && { to_lat: arrivalPlace.lat.toString(), to_lng: arrivalPlace.lng.toString() }),
       date: selectedDate ? selectedDate.toISOString().split("T")[0] : "",
       passengers: passengers.toString(),
     });
@@ -50,29 +56,25 @@ function OptionForm() {
           {/* Leaving From */}
           <div className="flex flex-col space-y-2">
             <Label className="text-lg font-medium">Leaving from</Label>
-            <div className="relative">
-              <MapPinIcon className="absolute left-3 top-3 size-5 text-muted-foreground" />
-              <Input
-                placeholder="Beirut Downtown"
-                className="pl-10"
-                value={departure}
-                onChange={(e) => setDeparture(e.target.value)}
-              />
-            </div>
+            <AddressAutocomplete
+              onPlaceSelected={(place) => {
+                setDeparture(place.address);
+                setDeparturePlace({ lat: place.lat, lng: place.lng });
+              }}
+              defaultValue={departure}
+            />
           </div>
 
           {/* Going To */}
           <div className="flex flex-col space-y-2">
             <Label className="text-lg font-medium">Going to</Label>
-            <div className="relative">
-              <MapPinIcon className="absolute left-3 top-3 size-5 text-muted-foreground" />
-              <Input
-                placeholder="Jounieh Marina"
-                className="pl-10"
-                value={arrival}
-                onChange={(e) => setArrival(e.target.value)}
-              />
-            </div>
+            <AddressAutocomplete
+              onPlaceSelected={(place) => {
+                setArrival(place.address);
+                setArrivalPlace({ lat: place.lat, lng: place.lng });
+              }}
+              defaultValue={arrival}
+            />
           </div>
 
           {/* Date */}
