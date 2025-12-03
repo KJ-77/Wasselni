@@ -33,12 +33,14 @@ const App = () => {
   return (
     <Router>
       <ThemeProvider>
-        <Navbar02 />
-        <Routes>
-          <Route path="/" element= {<Home />} />
-          <Route path="/carpool" element={<Carpool />} />
-          <Route path="/Bus" element={<Bus />} />
-          <Route path="/rides" element={<Rides />} />
+        <div className="flex flex-col min-h-screen">
+          <Navbar02 />
+          <main className="flex-1">
+            <Routes>
+              <Route path="/" element= {<Home />} />
+              <Route path="/carpool" element={<Carpool />} />
+              <Route path="/Bus" element={<Bus />} />
+              <Route path="/rides" element={<Rides />} />
           <Route
             path="/offerRides"
             element={
@@ -55,8 +57,8 @@ const App = () => {
               </ProtectedRoute>
             }
           /> 
-          <Route path="/trips" element={<TripsPage />} /> {/* New route for trips page */}
-          <Route path="/tripDetails/:tripId" element={<TripDetailsPage />} /> {/* New route for trip details page */}
+          <Route path="/trips" element={<TripsPage />} />
+          <Route path="/tripDetails/:tripId" element={<TripDetailsPage />} />
           <Route
             path="/tripBooking/:tripId"
             element={
@@ -110,8 +112,10 @@ const App = () => {
           />
           <Route path="/auth" element={<Auth />} /> {/* authentication page */}
           <Route path="/*" element={<NotFoundPage />} />
-        </Routes>
-        <SiteFooter />
+            </Routes>
+          </main>
+          <SiteFooter />
+        </div>
         <Toaster position="top-right" />
       </ThemeProvider>
     </Router>
