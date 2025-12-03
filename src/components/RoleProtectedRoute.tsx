@@ -1,8 +1,8 @@
 import { useAuth } from '@/contexts/AuthContext';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { ReactNode } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Car } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface RoleProtectedRouteProps {
@@ -23,6 +23,7 @@ const RoleProtectedRoute = ({
 }: RoleProtectedRouteProps) => {
   const auth = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Show loading state while checking authentication
   if (auth.isLoading) {
@@ -49,6 +50,43 @@ const RoleProtectedRoute = ({
 
   // Not authorized - show error message
   if (!hasRequiredRole) {
+    // Check if the required role is "Driver" - show special message
+    const requiresDriver = allowedRoles.includes('Driver');
+
+    if (requiresDriver) {
+      return (
+        <div className="container mx-auto px-4 py-16 max-w-2xl">
+          <Alert className="mb-6 border-blue-500 bg-blue-50 dark:bg-blue-950">
+            <Car className="h-4 w-4 text-blue-600" />
+            <AlertTitle className="text-blue-900 dark:text-blue-100">Driver Access Required</AlertTitle>
+            <AlertDescription className="text-blue-800 dark:text-blue-200">
+              This page is only accessible to registered drivers. Become a driver to access this feature!
+            </AlertDescription>
+          </Alert>
+
+          <div className="bg-card p-8 rounded-lg border">
+            <div className="flex items-center gap-3 mb-4">
+              <Car className="h-8 w-8 text-primary" />
+              <h2 className="text-2xl font-bold">Become a Driver</h2>
+            </div>
+            <p className="text-muted-foreground mb-6">
+              Join our community of drivers and start offering rides! Apply now to become a verified driver and unlock access to driver features.
+            </p>
+            <div className="flex gap-3">
+              <Button onClick={() => window.history.back()} variant="outline">
+                Go Back
+              </Button>
+              <Button onClick={() => navigate('/apply-driver')} className="gap-2">
+                <Car className="h-4 w-4" />
+                Apply to Become a Driver
+              </Button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // For other roles, show generic access denied
     return (
       <div className="container mx-auto px-4 py-16 max-w-2xl">
         <Alert variant="destructive" className="mb-6">

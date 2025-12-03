@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cognitoPoolConfig } from '@/config/auth';
+import { calculateAge, createUserInDatabase } from '@/lib/utils';
 
 // Initialize the Cognito User Pool
 const userPool = new CognitoUserPool(cognitoPoolConfig);
@@ -44,6 +45,17 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showVerification, setShowVerification] = useState(false);
   const [pendingEmail, setPendingEmail] = useState('');
+
+  // Store signup data for database creation after verification
+  const [pendingUserData, setPendingUserData] = useState<{
+    firstName: string;
+    lastName: string;
+    phone: string;
+    birthdate: string;
+    gender: string;
+    address: string;
+    password: string;
+  } | null>(null);
 
   /**
    * Handle Sign In
@@ -131,10 +143,22 @@ const Auth = () => {
 
         console.log('Sign up success, user:', result?.user.getUsername());
         setPendingEmail(email);
+
+        // Store user data (including password) for auto sign-in and database creation after verification
+        setPendingUserData({
+          firstName,
+          lastName,
+          phone,
+          birthdate,
+          gender,
+          address,
+          password,
+        });
+
         setShowVerification(true);
         setMessage('Verification code sent! Check your email and spam folder.');
 
-        // Clear sensitive fields
+        // Clear password fields from form (data is stored in pendingUserData)
         setPassword('');
         setConfirmPassword('');
       }
@@ -143,8 +167,9 @@ const Auth = () => {
 
   /**
    * Handle Email Verification
+   * After verification, automatically sign in the user and create their database record
    */
-  const handleVerifyEmail = (e: React.FormEvent) => {
+  const handleVerifyEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setMessage('');
@@ -155,21 +180,122 @@ const Auth = () => {
       Pool: userPool,
     });
 
-    cognitoUser.confirmRegistration(verificationCode, true, (err, result) => {
-      setIsLoading(false);
-
+    cognitoUser.confirmRegistration(verificationCode, true, async (err, result) => {
       if (err) {
+        setIsLoading(false);
         setError(err.message || 'Verification failed');
         return;
       }
 
       console.log('Verification success:', result);
-      setMessage('Email verified! You can now sign in.');
-      setShowVerification(false);
-      setActiveTab('signin');
-      setSignInEmail(pendingEmail);
-      setPendingEmail('');
-      setVerificationCode('');
+
+      // After successful verification, sign in the user automatically
+      if (pendingUserData) {
+        try {
+          // Sign in the user to get an authenticated session
+          await auth.signIn(pendingEmail, pendingUserData.password);
+
+          // Wait a brief moment for auth context to update
+          await new Promise(resolve => setTimeout(resolve, 500));
+
+          // Get the authenticated user to access their attributes
+          const currentUser = userPool.getCurrentUser();
+          if (!currentUser) {
+            setError('Verification succeeded, but auto sign-in failed. Please sign in manually.');
+            setIsLoading(false);
+            setShowVerification(false);
+            setActiveTab('signin');
+            setSignInEmail(pendingEmail);
+            return;
+          }
+
+          currentUser.getSession((sessionErr: Error | null, session: any) => {
+            if (sessionErr || !session) {
+              console.error('Error getting session:', sessionErr);
+              setError('Verification succeeded, but failed to get session. Please sign in manually.');
+              setIsLoading(false);
+              setShowVerification(false);
+              setActiveTab('signin');
+              setSignInEmail(pendingEmail);
+              return;
+            }
+
+            // Get user attributes from the authenticated session
+            currentUser.getUserAttributes(async (attrErr, attributes) => {
+              if (attrErr) {
+                console.error('Error getting user attributes:', attrErr);
+                setError('Verification succeeded, but failed to get user data. Please contact support.');
+                setIsLoading(false);
+                return;
+              }
+
+              // Extract the sub (user ID) from attributes
+              const subAttribute = attributes?.find(attr => attr.Name === 'sub');
+              if (!subAttribute) {
+                console.error('No sub attribute found');
+                setError('Verification succeeded, but user ID not found. Please contact support.');
+                setIsLoading(false);
+                return;
+              }
+
+              const userId = subAttribute.Value;
+
+              // Calculate age from birthdate
+              const age = calculateAge(pendingUserData.birthdate);
+
+              // Create user in database
+              try {
+                await createUserInDatabase({
+                  id: userId,
+                  full_name: `${pendingUserData.firstName} ${pendingUserData.lastName}`,
+                  gender: pendingUserData.gender,
+                  age,
+                  email: pendingEmail,
+                  phone_number: pendingUserData.phone,
+                  address: pendingUserData.address,
+                });
+
+                console.log('User created in database successfully');
+                setMessage('Account created successfully! Redirecting...');
+
+                // Clear all pending data including password
+                setPendingEmail('');
+                setPendingUserData(null);
+                setVerificationCode('');
+                setShowVerification(false);
+
+                // Redirect to home page after a brief moment
+                setTimeout(() => {
+                  setIsLoading(false);
+                  const from = location.state?.from?.pathname || '/';
+                  navigate(from, { replace: true });
+                }, 1000);
+              } catch (dbErr: any) {
+                console.error('Error creating user in database:', dbErr);
+                setError('Account verified, but failed to complete setup. Please contact support.');
+                setIsLoading(false);
+              }
+            });
+          });
+        } catch (signInErr: any) {
+          console.error('Error during auto sign-in:', signInErr);
+          setError('Verification succeeded, but auto sign-in failed. Please sign in manually.');
+          setIsLoading(false);
+          setShowVerification(false);
+          setActiveTab('signin');
+          setSignInEmail(pendingEmail);
+          setPendingUserData(null);
+        }
+      } else {
+        // No pending user data (shouldn't happen, but handle gracefully)
+        setIsLoading(false);
+        setMessage('Email verified! You can now sign in.');
+        setShowVerification(false);
+        setActiveTab('signin');
+        setSignInEmail(pendingEmail);
+        setPendingEmail('');
+        setVerificationCode('');
+      }
     });
   };
 
@@ -420,7 +546,6 @@ const Auth = () => {
                       <SelectItem value="Male">Male</SelectItem>
                       <SelectItem value="Female">Female</SelectItem>
                       <SelectItem value="Other">Other</SelectItem>
-                      <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

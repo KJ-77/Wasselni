@@ -22,6 +22,7 @@ import RatingsGiven from "./pages/dashboard/ratingsGiven";
 import Ratings from "./pages/dashboard/ratings";
 import SiteFooter from "./components/siteFooter";
 import Auth from './pages/auth';
+import ApplyDriver from './pages/applyDriver';
 import { Toaster } from "@/components/ui/sonner"
 import ProtectedRoute from "@/components/ProtectedRoute";
 import RoleProtectedRoute from "@/components/RoleProtectedRoute";
@@ -111,6 +112,14 @@ const App = () => {
             }
           />
           <Route path="/auth" element={<Auth />} /> {/* authentication page */}
+          <Route
+            path="/apply-driver"
+            element={
+              <ProtectedRoute>
+                <ApplyDriver />
+              </ProtectedRoute>
+            }
+          /> {/* driver application page */}
           <Route path="/*" element={<NotFoundPage />} />
             </Routes>
           </main>
