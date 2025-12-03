@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import emailjs from '@emailjs/browser';
+import imageCompression from 'browser-image-compression';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -66,6 +67,27 @@ const ApplyDriver = () => {
   };
 
   /**
+   * Compress image to reduce size for EmailJS free plan (50KB limit)
+   */
+  const compressImage = async (file: File): Promise<File> => {
+    const options = {
+      maxSizeMB: 0.02, // Target ~20KB per image (40KB total for 2 images)
+      maxWidthOrHeight: 800, // Reduce dimensions
+      useWebWorker: true,
+      fileType: 'image/jpeg', // Convert to JPEG for better compression
+    };
+
+    try {
+      const compressedFile = await imageCompression(file, options);
+      console.log(`Compressed ${file.name}: ${(file.size / 1024).toFixed(2)}KB → ${(compressedFile.size / 1024).toFixed(2)}KB`);
+      return compressedFile;
+    } catch (error) {
+      console.error('Error compressing image:', error);
+      throw new Error('Failed to compress image');
+    }
+  };
+
+  /**
    * Convert file to base64 for email attachment
    */
   const fileToBase64 = (file: File): Promise<string> => {
@@ -103,9 +125,18 @@ const ApplyDriver = () => {
       const userEmail = auth.userAttributes?.email || 'Unknown';
       const userName = auth.userAttributes?.name || 'Unknown User';
 
-      // Convert images to base64
-      const licenseBase64 = await fileToBase64(drivingLicenseImage);
-      const selfieBase64 = await fileToBase64(selfieImage);
+      // Compress images first to fit EmailJS free plan 50KB limit
+      console.log('Compressing images...');
+      const compressedLicense = await compressImage(drivingLicenseImage);
+      const compressedSelfie = await compressImage(selfieImage);
+
+      // Convert compressed images to base64
+      const licenseBase64 = await fileToBase64(compressedLicense);
+      const selfieBase64 = await fileToBase64(compressedSelfie);
+
+      // Check total size (just for logging)
+      const totalSize = (licenseBase64.length + selfieBase64.length) / 1024;
+      console.log(`Total payload size: ${totalSize.toFixed(2)}KB`);
 
       // Prepare email template parameters
       const templateParams = {
@@ -123,10 +154,10 @@ const ApplyDriver = () => {
       // Send email using EmailJS
       // Note: You'll need to replace these with your actual EmailJS credentials
       await emailjs.send(
-        'YOUR_SERVICE_ID', // Replace with your EmailJS service ID
-        'YOUR_TEMPLATE_ID', // Replace with your EmailJS template ID
+        'service_ng29dlh',
+        'template_mnkf3pf',
         templateParams,
-        'YOUR_PUBLIC_KEY' // Replace with your EmailJS public key
+        'rhp2vNTKa0sC1H8uz'
       );
 
       setSuccess(true);
