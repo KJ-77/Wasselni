@@ -53,6 +53,14 @@ export default tseslint.config({
 })
 ```
 
+## Mapbox Integration
 
+Google Maps APIs have been replaced with Mapbox for all map-related functionalities.
+The backend provides endpoints for `/directions` (POST) and `/autocomplete?q=...` (GET).
+
+**Environment Variable:**
+Ensure your `.env` file contains the public Mapbox token:
+`VITE_MAPBOX_PUBLIC_TOKEN="pk.YOUR_PUBLIC_MAPBOX_TOKEN"`
+This token is used by Mapbox GL JS and `react-map-gl` to access Mapbox services.
 
 hello
