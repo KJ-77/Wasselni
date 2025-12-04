@@ -1,8 +1,11 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Search, UserPlus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function GroupCtaSection() {
+  const navigate = useNavigate();
+
   return (
     <section className="w-full">
       <motion.div
@@ -31,6 +34,7 @@ export default function GroupCtaSection() {
                   background: "rgba(255,255,255,0.95)",
                   color: "var(--color-card)",
                 }}
+                onClick={() => navigate("/rides")}
               >
                 <Search className="w-4 h-4 text-muted-foreground" /> Find a Ride
               </Button>

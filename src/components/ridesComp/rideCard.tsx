@@ -4,9 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MessageSquare, Heart } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
+import { Ride } from "./types";
+import { useNavigate } from "react-router-dom";
 
+function RideCard({ ride }: { ride: Ride }) {
+  const navigate = useNavigate();
 
-function RideCard() {
+  const handleBooking = () => {
+    navigate(`/booking/${ride.id}`, { state: { ride } });
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -18,7 +25,7 @@ function RideCard() {
         <div className="bg-green-600 text-white px-4 py-2 text-sm font-medium flex items-center gap-2">
           <span>⭐ Top Rated Driver</span>
           <span>•</span>
-          <span>Instant Book</span>
+          <span>{ride.bookingType} Book</span>
         </div>
 
         <CardContent className="p-5">
@@ -26,26 +33,26 @@ function RideCard() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-full bg-purple-500 text-white flex items-center justify-center font-bold text-xl">
-                AM
+                {ride.driver.avatar}
               </div>
               <div>
-                <h2 className="text-lg font-semibold">Ahmad M.</h2>
+                <h2 className="text-lg font-semibold">{ride.driver.name}</h2>
                 <div className="flex-col items-center gap-4 text-sm">
-                  <span>⭐ 4.9 </span>
-                  <span className="text-secondary">(127 trips)</span>
+                  <span>⭐ {ride.driver.rating} </span>
+                  <span className="text-secondary">({ride.driver.trips} trips)</span>
                   <div className="flex items-center gap-1 pt-3">
-                  <Badge variant="secondary">Verified</Badge>
-                  <Badge variant="outline">AUB</Badge>
-                  <Badge className="bg-green-200 text-green-700">Pro</Badge>
+                    {ride.driver.isVerified && <Badge variant="secondary">Verified</Badge>}
+                    {ride.driver.aubGrad && <Badge variant="outline">AUB</Badge>}
+                    {ride.driver.isPro && <Badge className="bg-green-200 text-green-700">Pro</Badge>}
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="text-right">
-              <p className="text-3xl font-bold text-green-600">$8</p>
+              <p className="text-3xl font-bold text-green-600">${ride.price.amount}</p>
               <p className="text-xs text-gray-500">per person</p>
-              <p className="text-xs text-green-500">Save $42</p>
+              {ride.price.discount && <p className="text-xs text-green-500">Save ${ride.price.discount}</p>}
             </div>
           </div>
 
@@ -53,10 +60,10 @@ function RideCard() {
           <div className="rounded-xl p-4 mt-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-semibold">Beirut Central District</p>
-                <p className="text-sm text-gray-500">Hamra, Beirut</p>
+                <p className="font-semibold">{ride.route.from.name}</p>
+                <p className="text-sm text-gray-500">{ride.route.from.location}</p>
               </div>
-              <p className="text-sm font-medium">Today 2:30 PM</p>
+              <p className="text-sm font-medium">{ride.route.departureTime}</p>
             </div>
 
             <div className="flex items-center pl-7 my-4 gap-4">
@@ -65,30 +72,29 @@ function RideCard() {
               <Slider defaultValue={[30]} max={30} step={0} disabled color="blue"
               orientation="vertical" /> 
               <Badge variant="outline" className="px-3 py-1 text-gray-700">
-                🚗 2h 15m • 85 km • Highway Route
+                🚗 {ride.tripDetails.duration} • {ride.tripDetails.distance} km • {ride.tripDetails.description}
               </Badge>
             </div>
 
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-semibold">Tripoli City Center</p>
-                <p className="text-sm text-gray-500">Al-Mina, Tripoli</p>
+                <p className="font-semibold">{ride.route.to.name}</p>
+                <p className="text-sm text-gray-500">{ride.route.to.location}</p>
               </div>
-              <p className="text-sm font-medium">Today 4:45 PM</p>
+              <p className="text-sm font-medium">{ride.route.arrivalTime}</p>
             </div>
           </div>
 
           {/* Vehicle */}
           <div className="flex items-center gap-4 text-sm text-gray-600 mt-4">
-            <span>🚙 BMW X3</span>
-            <span>👥 2/4 seats</span>
-            <span>❄️ AC</span>
-            <span>🎵 Music</span>
+            <span>🚙 {ride.vehicle.model}</span>
+            <span>👥 {ride.vehicle.seats.booked}/{ride.vehicle.seats.total} seats</span>
+            {ride.vehicle.amenities.map(amenity => <span key={amenity}>❄️ {amenity}</span>)}
           </div>
 
           {/* Footer Buttons */}
           <div className="flex items-center justify-between mt-6">
-            <Button className="bg-green-600 hover:bg-green-700 w-full py-6 text-base font-semibold flex-1 rounded-xl">
+            <Button onClick={handleBooking} className="bg-green-600 hover:bg-green-700 w-full py-6 text-base font-semibold flex-1 rounded-xl">
               ⚡ Book Instantly
             </Button>
 

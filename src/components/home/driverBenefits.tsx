@@ -2,8 +2,16 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DollarSign, ShieldCheck, Calendar } from "lucide-react";
+import { useNavigate } from "react-router-dom"; // ✅ import navigate
 
 export default function DriverBenefits() {
+  const navigate = useNavigate();
+
+  const handleStart = () => {
+    // Navigate to driver signup page
+    navigate("/offerRides"); 
+  };
+
   return (
     <section className="px-6 md:px-12">
       <div className="max-w-xl">
@@ -41,6 +49,7 @@ export default function DriverBenefits() {
               color: "var(--primary-foreground)",
               boxShadow: "0 8px 24px rgba(16,24,40,0.08)",
             }}
+            onClick={handleStart} // ✅ navigate on click
           >
             Start Earning Today
           </Button>

@@ -1,6 +1,7 @@
-import { Card,  CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, DollarSign } from "lucide-react";
+import { useNavigate } from "react-router-dom"; // ✅ import navigate
 
 type ActiveRide = {
   id: string;
@@ -28,6 +29,13 @@ const sampleRides: ActiveRide[] = [
 ];
 
 export default function DriverDashboardCard() {
+  const navigate = useNavigate();
+
+  const handlePublish = () => {
+    // Navigate to publish ride page
+    navigate("/offerRides");
+  };
+
   return (
     <div className="px-6 md:px-0">
       <Card
@@ -62,12 +70,10 @@ export default function DriverDashboardCard() {
           >
             <div className="flex items-center justify-between">
               <div className="text-xs text-muted-foreground">This Month's Earnings</div>
-
               <div className="text-sm text-muted-foreground">
                 <DollarSign className="inline-block w-4 h-4 mr-1 align-middle" />
               </div>
             </div>
-
             <div className="mt-3 text-2xl font-bold text-secondary">${347}</div>
           </div>
 
@@ -111,6 +117,7 @@ export default function DriverDashboardCard() {
               background: "var(--brand-gradient)",
               color: "var(--primary-foreground)",
             }}
+            onClick={handlePublish} // ✅ navigate on click
           >
             <Plus className="w-4 h-4" /> <span>Publish New Ride</span>
           </Button>
@@ -120,7 +127,7 @@ export default function DriverDashboardCard() {
   );
 }
 
-/* Small avatar for initials (keeps it simple & shadcn-compatible) */
+/* Small avatar for initials */
 function AvatarInitial({ initials }: { initials: string }) {
   return (
     <div

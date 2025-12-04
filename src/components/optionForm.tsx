@@ -1,9 +1,10 @@
 import * as React from "react";
+import { useNavigate } from "react-router-dom"; // ✅ import navigate
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MapPinIcon, SearchIcon, ArrowLeftIcon, ArrowRightIcon, UserIcon } from "lucide-react";
+import { SearchIcon, ArrowLeftIcon, ArrowRightIcon, UserIcon } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import {
   MiniCalendar,
@@ -13,7 +14,15 @@ import {
 } from "@/components/ui/shadcn-io/mini-calendar";
 import { FaCalendarAlt } from "react-icons/fa";
 
+import { AddressAutocomplete } from "@/components/AddressAutocomplete";
+
 function OptionForm() {
+  const navigate = useNavigate();
+
+  const [departure, setDeparture] = React.useState("");
+  const [arrival, setArrival] = React.useState("");
+  const [departurePlace, setDeparturePlace] = React.useState<{ lat: number; lng: number } | null>(null);
+  const [arrivalPlace, setArrivalPlace] = React.useState<{ lat: number; lng: number } | null>(null);
   const [passengers, setPassengers] = React.useState(1);
   const [openDate, setOpenDate] = React.useState(false);
   const [openPassengers, setOpenPassengers] = React.useState(false);
@@ -22,9 +31,21 @@ function OptionForm() {
   const increment = () => setPassengers((p) => p + 1);
   const decrement = () => setPassengers((p) => (p > 1 ? p - 1 : 1));
 
+  const handleSearch = () => {
+    const params = new URLSearchParams({
+      departure: departure,
+      arrival: arrival,
+      ...(departurePlace && { from_lat: departurePlace.lat.toString(), from_lng: departurePlace.lng.toString() }),
+      ...(arrivalPlace && { to_lat: arrivalPlace.lat.toString(), to_lng: arrivalPlace.lng.toString() }),
+      date: selectedDate ? selectedDate.toISOString().split("T")[0] : "",
+      passengers: passengers.toString(),
+    });
+    navigate(`/rides?${params.toString()}`);
+  };
+
   return (
     <div className="w-full flex justify-center py-10 px-4">
-      <Card className="w-full  max-w-4xl h-full shadow-lg border-0 ">
+      <Card className="w-full max-w-4xl h-full shadow-lg border-0">
         <CardHeader>
           <CardTitle className="text-2xl font-semibold text-center">
             Find a Ride
@@ -35,47 +56,43 @@ function OptionForm() {
           {/* Leaving From */}
           <div className="flex flex-col space-y-2">
             <Label className="text-lg font-medium">Leaving from</Label>
-            <div className="relative">
-              <MapPinIcon className="absolute left-3 top-3 size-5 text-muted-foreground" />
-              <Input placeholder="Beirut Downtown" className="pl-10" />
-            </div>
+            <AddressAutocomplete
+              onPlaceSelected={(place) => {
+                setDeparture(place.address);
+                setDeparturePlace({ lat: place.lat, lng: place.lng });
+              }}
+              defaultValue={departure}
+            />
           </div>
 
           {/* Going To */}
           <div className="flex flex-col space-y-2">
             <Label className="text-lg font-medium">Going to</Label>
-            <div className="relative">
-              <MapPinIcon className="absolute left-3 top-3 size-5 text-muted-foreground" />
-              <Input placeholder="Jounieh Marina" className="pl-10" />
-            </div>
+            <AddressAutocomplete
+              onPlaceSelected={(place) => {
+                setArrival(place.address);
+                setArrivalPlace({ lat: place.lat, lng: place.lng });
+              }}
+              defaultValue={arrival}
+            />
           </div>
 
           {/* Date */}
           <div className="flex flex-col space-y-2">
             <Label className="text-lg font-medium">Pick a date</Label>
-
             <Popover open={openDate} onOpenChange={setOpenDate}>
               <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="justify-start font-normal"
-                >
-                  <FaCalendarAlt className="mr-2 " />
-                  {selectedDate
-                    ? selectedDate.toLocaleDateString()
-                    : "Select date"}
+                <Button variant="outline" className="justify-start font-normal">
+                  <FaCalendarAlt className="mr-2" />
+                  {selectedDate ? selectedDate.toLocaleDateString() : "Select date"}
                 </Button>
               </PopoverTrigger>
-
               <PopoverContent
                 align="start"
                 className="w-auto overflow-hidden p-0 bg-transparent shadow-none border-0"
               >
                 <div className="space-y-4 p-4">
-                  <MiniCalendar
-                    value={selectedDate}
-                    onValueChange={setSelectedDate}
-                  >
+                  <MiniCalendar value={selectedDate} onValueChange={setSelectedDate}>
                     <MiniCalendarNavigation asChild direction="prev">
                       <Button size="icon" variant="outline">
                         <ArrowLeftIcon className="h-4 w-4" />
@@ -102,7 +119,6 @@ function OptionForm() {
           {/* Passengers */}
           <div className="flex flex-col space-y-2">
             <Label className="text-lg font-medium">Passengers</Label>
-
             <Popover open={openPassengers} onOpenChange={setOpenPassengers}>
               <PopoverTrigger asChild>
                 <Button variant="outline" className="justify-start font-normal">
@@ -110,19 +126,12 @@ function OptionForm() {
                   {passengers} Passenger{passengers > 1 ? "s" : ""}
                 </Button>
               </PopoverTrigger>
-
               <PopoverContent className="w-52 p-4" align="start">
                 <div className="flex items-center justify-between">
                   <Button size="icon" variant="outline" onClick={decrement}>
                     –
                   </Button>
-
-                  <Input
-                    value={passengers}
-                    readOnly
-                    className="w-12 text-center"
-                  />
-
+                  <Input value={passengers} readOnly className="w-12 text-center" />
                   <Button size="icon" variant="default" onClick={increment}>
                     +
                   </Button>
@@ -136,6 +145,7 @@ function OptionForm() {
             <Button
               size="lg"
               className="w-full rounded-xl font-medium text-lg py-6 bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow"
+              onClick={handleSearch} // ✅ navigate on click
             >
               <SearchIcon className="mr-2 size-5" />
               Search Rides
