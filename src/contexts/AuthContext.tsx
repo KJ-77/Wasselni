@@ -56,23 +56,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return payload['cognito:groups'] || [];
   };
 
-  // Fetch driver DB ID from backend using Cognito sub
-  const fetchDriverId = async (cognitoSub: string) => {
-    try {
-      const apiUrl = 'https://rl4ynabhzk.execute-api.me-central-1.amazonaws.com';
-      const response = await fetch(`${apiUrl}/drivers?user_id=${cognitoSub}`);
-      if (response.ok) {
-        const drivers = await response.json();
-        if (drivers && drivers.length > 0) {
-          setDriverId(drivers[0].id);
-          console.log('[AuthContext] Driver ID fetched:', drivers[0].id);
-        }
-      }
-    } catch (err) {
-      console.error('[AuthContext] Error fetching driver ID:', err);
-    }
-  };
-
   // Check if user is already authenticated on mount
   useEffect(() => {
     const currentUser = userPool.getCurrentUser();
