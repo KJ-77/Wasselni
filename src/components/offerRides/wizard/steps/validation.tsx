@@ -1,8 +1,8 @@
 import { WizardData } from "./types";
 
 export const validateStep1 = (data: WizardData) => {
-  const { departureCity, arrivalCity, departureDate, departureTime } = data.routeDetails;
-  return !!departureCity && !!arrivalCity && !!departureDate && !!departureTime;
+  const { departureCity, arrivalCity, departureDate, departureTime, selectedRoute } = data.routeDetails;
+  return !!departureCity && !!arrivalCity && !!departureDate && !!departureTime && !!selectedRoute;
 };
 
 export const validateStep2 = (data: WizardData) => {

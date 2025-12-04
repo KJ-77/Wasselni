@@ -6,9 +6,13 @@ type RouteMapProps = {
   distance: number;     // km
   duration: string;     // formatted (ex: "2h 15m")
   traffic: "Light" | "Moderate" | "Heavy";
+  origin: { lat: number, lng: number };
+  destination: { lat: number, lng: number };
+  originName: string;
+  destinationName: string;
 };
 
-export default function RouteMap({ distance, duration, traffic }: RouteMapProps) {
+export default function RouteMap({ distance, duration, traffic, origin, destination, originName, destinationName }: RouteMapProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 15 }}
@@ -22,12 +26,12 @@ export default function RouteMap({ distance, duration, traffic }: RouteMapProps)
           <p className="font-semibold text-sm flex items-center gap-2">
             📍 Route Map
           </p>
-          <p className="text-xs opacity-90">Beirut → Tripoli • {distance} km</p>
+          <p className="text-xs opacity-90">{originName} → {destinationName} • {distance} km</p>
         </div>
 
         {/* Map */}
         <div className="h-[260px] relative">
-          <Map className="absolute inset-0" />
+          <Map className="absolute inset-0" origin={origin} destination={destination} />
         </div>
 
         {/* Info Section */}
