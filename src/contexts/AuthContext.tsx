@@ -12,7 +12,11 @@ interface AuthContextType {
   user: CognitoUser | null;
   userAttributes: Record<string, string> | null;
   userGroups: string[];
+<<<<<<< Updated upstream
   driverId: number | null;
+=======
+  driverId: number | null; // Database driver ID (for drivers only)
+>>>>>>> Stashed changes
   hasRole: (role: string) => boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => void;
@@ -31,6 +35,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [userGroups, setUserGroups] = useState<string[]>([]);
   const [driverId, setDriverId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Fetch driver database ID if user is a driver
+  const fetchDriverId = async (cognitoSub: string) => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const response = await fetch(`${apiUrl}/drivers?user_id=${cognitoSub}`);
+      if (response.ok) {
+        const drivers = await response.json();
+        if (drivers && drivers.length > 0) {
+          setDriverId(drivers[0].id);
+          console.log('Driver ID fetched:', drivers[0].id);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch driver ID:', err);
+    }
+  };
 
   // Helper function to extract groups from session
   const extractGroups = (session: CognitoUserSession): string[] => {
@@ -73,7 +94,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUserGroups(extractGroups(session));
 
           // Get user attributes
-          currentUser.getUserAttributes((err, attributes) => {
+          currentUser.getUserAttributes(async (err, attributes) => {
             if (err) {
               console.error('Error getting attributes:', err);
             } else if (attributes) {
@@ -85,8 +106,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
               // Fetch driver ID if user is in Driver group
               const groups = extractGroups(session);
+<<<<<<< Updated upstream
               if (groups.includes('Driver') && attrs['sub']) {
                 fetchDriverId(attrs['sub']);
+=======
+              if (groups.includes('Driver') && attrs.sub) {
+                await fetchDriverId(attrs.sub);
+>>>>>>> Stashed changes
               }
             }
             setIsLoading(false);
@@ -124,7 +150,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUserGroups(extractGroups(session));
 
           // Get user attributes
-          cognitoUser.getUserAttributes((err, attributes) => {
+          cognitoUser.getUserAttributes(async (err, attributes) => {
             if (err) {
               console.error('Error getting attributes:', err);
               setError(err.message);
@@ -137,8 +163,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
               // Fetch driver ID if user is in Driver group
               const groups = extractGroups(session);
+<<<<<<< Updated upstream
               if (groups.includes('Driver') && attrs['sub']) {
                 fetchDriverId(attrs['sub']);
+=======
+              if (groups.includes('Driver') && attrs.sub) {
+                await fetchDriverId(attrs.sub);
+>>>>>>> Stashed changes
               }
             }
             setIsLoading(false);
