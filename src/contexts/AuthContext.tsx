@@ -12,11 +12,7 @@ interface AuthContextType {
   user: CognitoUser | null;
   userAttributes: Record<string, string> | null;
   userGroups: string[];
-<<<<<<< Updated upstream
-  driverId: number | null;
-=======
   driverId: number | null; // Database driver ID (for drivers only)
->>>>>>> Stashed changes
   hasRole: (role: string) => boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => void;
@@ -106,13 +102,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
               // Fetch driver ID if user is in Driver group
               const groups = extractGroups(session);
-<<<<<<< Updated upstream
-              if (groups.includes('Driver') && attrs['sub']) {
-                fetchDriverId(attrs['sub']);
-=======
               if (groups.includes('Driver') && attrs.sub) {
                 await fetchDriverId(attrs.sub);
->>>>>>> Stashed changes
               }
             }
             setIsLoading(false);
@@ -163,13 +154,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
               // Fetch driver ID if user is in Driver group
               const groups = extractGroups(session);
-<<<<<<< Updated upstream
-              if (groups.includes('Driver') && attrs['sub']) {
-                fetchDriverId(attrs['sub']);
-=======
               if (groups.includes('Driver') && attrs.sub) {
                 await fetchDriverId(attrs.sub);
->>>>>>> Stashed changes
               }
             }
             setIsLoading(false);
