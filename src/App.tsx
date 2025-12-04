@@ -23,6 +23,7 @@ import Ratings from "./pages/dashboard/ratings";
 import SiteFooter from "./components/siteFooter";
 import Auth from './pages/auth';
 import ApplyDriver from './pages/applyDriver';
+import ApproveDriver from './pages/approveDriver';
 import { Toaster } from "@/components/ui/sonner"
 import ProtectedRoute from "@/components/ProtectedRoute";
 import RoleProtectedRoute from "@/components/RoleProtectedRoute";
@@ -120,6 +121,7 @@ const App = () => {
               </ProtectedRoute>
             }
           /> {/* driver application page */}
+          <Route path="/approve-driver" element={<ApproveDriver />} /> {/* driver approval page (from email link) */}
           <Route path="/*" element={<NotFoundPage />} />
             </Routes>
           </main>

@@ -121,9 +121,16 @@ const ApplyDriver = () => {
         return;
       }
 
-      // Get user email and name
+      // Get user info and Cognito sub
       const userEmail = auth.userAttributes?.email || 'Unknown';
       const userName = auth.userAttributes?.name || 'Unknown User';
+      const userSub = auth.userAttributes?.sub || '';
+
+      if (!userSub) {
+        setError('Unable to get user ID. Please try again.');
+        setIsLoading(false);
+        return;
+      }
 
       // Compress images first to fit EmailJS free plan 50KB limit
       console.log('Compressing images...');
@@ -138,10 +145,21 @@ const ApplyDriver = () => {
       const totalSize = (licenseBase64.length + selfieBase64.length) / 1024;
       console.log(`Total payload size: ${totalSize.toFixed(2)}KB`);
 
+      // Create approval URL with encoded data
+      const approvalUrl = `${window.location.origin}/approve-driver?` +
+        `userId=${encodeURIComponent(userSub)}&` +
+        `licenseNumber=${encodeURIComponent(drivingLicenseNumber)}&` +
+        `fatherName=${encodeURIComponent(fatherName)}&` +
+        `motherName=${encodeURIComponent(motherName)}&` +
+        `nationality=${encodeURIComponent(nationality)}&` +
+        `userName=${encodeURIComponent(userName)}&` +
+        `userEmail=${encodeURIComponent(userEmail)}`;
+
       // Prepare email template parameters
       const templateParams = {
         user_name: userName,
         user_email: userEmail,
+        user_sub: userSub,
         driving_license_number: drivingLicenseNumber,
         father_name: fatherName,
         mother_name: motherName,
@@ -149,6 +167,7 @@ const ApplyDriver = () => {
         driving_license_image: licenseBase64,
         selfie_image: selfieBase64,
         application_date: new Date().toLocaleDateString(),
+        approval_url: approvalUrl,
       };
 
       // Send email using EmailJS
