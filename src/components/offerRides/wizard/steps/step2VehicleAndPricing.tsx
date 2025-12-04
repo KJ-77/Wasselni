@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Plus, DollarSign } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -84,6 +85,26 @@ export default function Step2VehicleAndPricing({ data, setData, vehicles, onOpen
              <CardTitle className="flex items-center"><DollarSign className="w-5 h-5 mr-2 text-green-600" /> Set Your Price</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Price Type *</Label>
+              <RadioGroup
+                value={vehicleAndPricing.priceType || "fixed"}
+                onValueChange={(value) => updateField("priceType", value as "fixed" | "per_distance")}
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="fixed" id="fixed" />
+                  <Label htmlFor="fixed" className="font-normal cursor-pointer">
+                    Fixed Price (total for the ride)
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="per_distance" id="per_distance" />
+                  <Label htmlFor="per_distance" className="font-normal cursor-pointer">
+                    Per Distance (calculated per km)
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <Label htmlFor="pricePerSeat">Price per Seat (USD) *</Label>

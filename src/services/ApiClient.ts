@@ -79,12 +79,12 @@ export interface Ride {
   arrival_time: string; // ISO8601
   total_seats: number;
   available_seats: number;
-  price_type: 'per_seat' | 'fixed';
+  price_type: 'fixed' | 'per_distance';
   max_price: number;
   driver_price?: number;
   is_recurring: boolean;
   recurring_days?: string; // "mon,wed,fri"
-  ride_status: 'published' | 'draft' | 'archived' | 'cancelled';
+  ride_status: 'active' | 'cancelled' | 'completed';
   preferences?: Record<string, any>;
   created_at?: string;
   updated_at?: string;

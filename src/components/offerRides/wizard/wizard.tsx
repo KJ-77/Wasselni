@@ -11,22 +11,14 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import AddVehicleModal from "../AddVehicleModal";
-import { transformToFlatPayload } from "@/services/RideDataService";
+import { transformWizardDataToRidePayload } from "@/services/RideDataService";
 import apiClient from "@/services/ApiClient";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 export default function Wizard() {
   const navigate = useNavigate();
-  // Lightweight fallback toast replacement while a project-wide toast isn't available
-  const toast = (opts: { title?: string; description?: string; variant?: string }) => {
-    if (opts.variant === "destructive") {
-      // destructives show a blocking alert for now
-      // eslint-disable-next-line no-alert
-      alert(`${opts.title || ""}\n${opts.description || ""}`);
-    } else {
-      // non-destructive just log
-      console.log("Toast:", opts.title, opts.description);
-    }
-  };
+  const auth = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   
@@ -68,9 +60,8 @@ export default function Wizard() {
     setVehicles(prev => [...prev, newVehicle]);
     // Optionally, automatically select the new vehicle
     setData(prev => ({...prev, vehicleAndPricing: {...prev.vehicleAndPricing, selectedVehicleId: newVehicle.id}}));
-    toast({
-        title: "Vehicle Added",
-        description: `${newVehicle.make} ${newVehicle.model} has been registered.`,
+    toast.success("Vehicle Added", {
+      description: `${newVehicle.make} ${newVehicle.model} has been registered.`,
     });
   };
 
@@ -116,11 +107,19 @@ export default function Wizard() {
   ];
 
   const next = () => {
-    if (validateAll[currentStep] && !validateAll[currentStep](data)) {
-      toast({
-        variant: "destructive",
-        title: "Incomplete Step",
-        description: "Please fill all required fields before continuing.",
+    const validation = validateAll[currentStep](data);
+    if (!validation.isValid) {
+      toast.error("Incomplete Step", {
+        description: (
+          <div className="flex flex-col gap-1">
+            <p className="font-medium">Please complete the following fields:</p>
+            <ul className="list-disc list-inside space-y-1">
+              {validation.errors.map((error, index) => (
+                <li key={index} className="text-sm">{error}</li>
+              ))}
+            </ul>
+          </div>
+        ),
       });
       return;
     }
@@ -170,50 +169,87 @@ export default function Wizard() {
   
 
   const submit = async () => {
-    if (!validateAll[4](data)) {
-      toast({
-        variant: "destructive",
-        title: "Terms and Conditions",
-        description: "You must agree to the terms and conditions to publish a ride.",
+    // 1. Validate form
+    const step4Validation = validateAll[4](data);
+    if (!step4Validation.isValid) {
+      toast.error("Terms and Conditions", {
+        description: step4Validation.errors.join(", "),
       });
       return;
     }
-    if (!validateAll[1](data) || !validateAll[2](data) || !validateAll[3](data)) {
-        toast({
-            variant: "destructive",
-            title: "Incomplete Form",
-            description: "Please complete all previous steps before submitting.",
-        });
+
+    // Validate all previous steps
+    const allValidations = [
+      { step: 1, validation: validateAll[1](data) },
+      { step: 2, validation: validateAll[2](data) },
+      { step: 3, validation: validateAll[3](data) },
+    ];
+
+    const invalidStep = allValidations.find(v => !v.validation.isValid);
+    if (invalidStep) {
+      toast.error(`Incomplete Form - Step ${invalidStep.step}`, {
+        description: (
+          <div className="flex flex-col gap-1">
+            <p className="font-medium">Please complete the following fields:</p>
+            <ul className="list-disc list-inside space-y-1">
+              {invalidStep.validation.errors.map((error, index) => (
+                <li key={index} className="text-sm">{error}</li>
+              ))}
+            </ul>
+          </div>
+        ),
+      });
       return;
     }
+
+    // 2. Get driver ID from auth
+    const driverId = auth.driverId;
+    if (!driverId) {
+      toast.error("Driver ID Missing", {
+        description: "Unable to get driver information. Please try signing in again.",
+      });
+      return;
+    }
+
+    // 3. Get selected vehicle
+    const selectedVehicle = vehicles.find(v => v.id === data.vehicleAndPricing.selectedVehicleId);
+    if (!selectedVehicle) {
+      throw new Error("Selected vehicle not found");
+    }
+
     setLoading(true);
     try {
-      // Get the selected vehicle
-      const selectedVehicle = vehicles.find(v => v.id === data.vehicleAndPricing.selectedVehicleId);
-      if (!selectedVehicle) {
-        throw new Error("Selected vehicle not found");
-      }
+      // 4. Transform data to get ride object
+      const { ride } = transformWizardDataToRidePayload(data, driverId, selectedVehicle);
 
-      // Transform WizardData to backend API format
-      const payload = transformToFlatPayload(data, "user_id_placeholder", selectedVehicle);
-      console.log("[Wizard] Submitting ride payload:", payload);
+      // TEMPORARY: Skip route creation and use hardcoded route_id = 1 for testing
+      // TODO: Re-enable route creation once map/route selection is implemented
+      console.log("[Wizard] Using hardcoded route_id = 1 for testing");
 
-      // Use ApiClient to submit ride (cast to Ride type since transformation handles mapping)
-      await apiClient.createRide(payload as any);
+      // 5. Create ride with route_id = 1 (POST /rides)
+      console.log("[Wizard] Creating ride...");
+      const ridePayload = {
+        ...ride,
+        route_id: 1,  // Hardcoded for testing
+      };
 
-      toast({
-        title: "Ride Published!",
+      const rideResponse = await apiClient.createRide(ridePayload as any);
+      console.log("[Wizard] Ride created successfully:", rideResponse);
+
+      // Note: Stops creation also skipped for now since routes are not being created
+
+      toast.success("Ride Published!", {
         description: "Your ride is now visible to passengers.",
       });
+
       setTimeout(() => {
         navigate("/rides");
       }, 1000);
+
     } catch (err) {
       console.error(err);
-      toast({
-          variant: "destructive",
-          title: "Submission Failed",
-          description: err instanceof Error ? err.message : "Failed to submit ride. Please try again.",
+      toast.error("Submission Failed", {
+        description: err instanceof Error ? err.message : "Failed to submit ride. Please try again.",
       });
     } finally {
       setLoading(false);

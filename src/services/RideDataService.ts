@@ -35,27 +35,17 @@ export interface BackendStop {
 export interface BackendRide {
   driver_id: string | number;
   route_id: number;
+  vehicleUsed: string; // Foreign key to vehicles table (ID as string)
   departure_time: string; // ISO datetime
   arrival_time: string; // ISO datetime
   total_seats: number;
   available_seats: number;
-  price_type: "per_seat" | "fixed";
+  price_type: "fixed" | "per_distance";
   max_price: number;
   driver_price: number;
   is_recurring: boolean;
-  recurring_days?: string; // JSON string or comma-separated
-  vehicleUsed: {
-    id: number | string;
-    make: string;
-    model: string;
-    year: number;
-    color: string;
-    plate: string;
-    type: string;
-    capacity: number;
-    verified: boolean;
-  };
-  ride_status: "published" | "draft" | "archived";
+  recurring_days: string[]; // JSON array format (never undefined, use empty array)
+  ride_status: "active" | "cancelled" | "completed";
   preferences: {
     amenities: string[];
     instantBooking: boolean;
@@ -91,35 +81,38 @@ export function transformWizardDataToRidePayload(
 ): RidePayload {
   const { routeDetails, vehicleAndPricing, preferences, publishing } = data;
 
-  if (!routeDetails.selectedRoute) {
-    throw new Error("No route selected");
-  }
+  // TEMPORARY: Allow submission without route selection for testing
+  // Route selection will be re-enabled when map functionality is complete
+  // if (!routeDetails.selectedRoute) {
+  //   throw new Error("No route selected");
+  // }
 
-  if (!routeDetails.departureCoordinates || !routeDetails.arrivalCoordinates) {
-    throw new Error("Missing departure or arrival coordinates");
-  }
+  // if (!routeDetails.departureCoordinates || !routeDetails.arrivalCoordinates) {
+  //   throw new Error("Missing departure or arrival coordinates");
+  // }
 
   // Combine departure date and time into ISO datetime
   const departureDatetime = new Date(`${routeDetails.departureDate}T${routeDetails.departureTime}`);
   const departureTimeISO = departureDatetime.toISOString();
 
-  // Calculate arrival time
+  // Calculate arrival time (use default 1 hour if no route duration)
+  const defaultDuration = 3600; // 1 hour in seconds
   const arrivalTimeISO = calculateArrivalTime(
     departureTimeISO,
-    routeDetails.selectedRoute.duration || 0
+    routeDetails.selectedRoute?.duration || defaultDuration
   );
 
-  // Create route object
+  // Create route object (with default values for testing when route not selected)
   const route: BackendRoute = {
     start_location: routeDetails.departureCity,
     end_location: routeDetails.arrivalCity,
-    departureLat: routeDetails.departureCoordinates.lat,
-    departureLng: routeDetails.departureCoordinates.lng,
-    arrivalLat: routeDetails.arrivalCoordinates.lat,
-    arrivalLng: routeDetails.arrivalCoordinates.lng,
-    polyline: routeDetails.selectedRoute.polyline || "",
-    distance: routeDetails.selectedRoute.distance || 0,
-    duration: routeDetails.selectedRoute.duration || 0,
+    departureLat: routeDetails.departureCoordinates?.lat || 0,
+    departureLng: routeDetails.departureCoordinates?.lng || 0,
+    arrivalLat: routeDetails.arrivalCoordinates?.lat || 0,
+    arrivalLng: routeDetails.arrivalCoordinates?.lng || 0,
+    polyline: routeDetails.selectedRoute?.polyline || "",
+    distance: routeDetails.selectedRoute?.distance || 0,
+    duration: routeDetails.selectedRoute?.duration || defaultDuration,
   };
 
   // Create stops array
@@ -133,11 +126,12 @@ export function transformWizardDataToRidePayload(
   }));
 
   // Determine price type and create ride object
-  const priceType: "per_seat" | "fixed" = "per_seat";
+  const priceType: "fixed" | "per_distance" = vehicleAndPricing.priceType || "fixed";
 
   const ride: BackendRide = {
     driver_id: driverId,
     route_id: 0, // Will be set after route creation
+    vehicleUsed: "8", // TEMPORARY: Hardcoded vehicle ID for testing - TODO: use actual vehicle ID from database
     departure_time: departureTimeISO,
     arrival_time: arrivalTimeISO,
     total_seats: selectedVehicle.capacity,
@@ -146,19 +140,10 @@ export function transformWizardDataToRidePayload(
     max_price: vehicleAndPricing.pricePerSeat,
     driver_price: vehicleAndPricing.pricePerSeat,
     is_recurring: publishing.recurringRide || false,
-    recurring_days: publishing.recurrenceDays?.join(",") || undefined,
-    vehicleUsed: {
-      id: selectedVehicle.id,
-      make: selectedVehicle.make,
-      model: selectedVehicle.model,
-      year: selectedVehicle.year,
-      color: selectedVehicle.color,
-      plate: selectedVehicle.plate,
-      type: selectedVehicle.type,
-      capacity: selectedVehicle.capacity,
-      verified: selectedVehicle.verified,
-    },
-    ride_status: "published" as const,
+    recurring_days: (publishing.recurrenceDays && publishing.recurrenceDays.length > 0)
+      ? publishing.recurrenceDays
+      : [], // Use empty array instead of undefined - backend doesn't accept undefined
+    ride_status: "active" as const,
     preferences: {
       amenities: preferences.amenities || [],
       instantBooking: preferences.instantBooking || false,

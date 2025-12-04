@@ -55,6 +55,7 @@ export interface VehicleAndPricing {
   selectedVehicleId: number | string | null;
   availableSeats: number;
   pricePerSeat: number;
+  priceType?: "fixed" | "per_distance";
 }
 
 // Step 3: Ride Preferences

@@ -12,6 +12,7 @@ interface AuthContextType {
   user: CognitoUser | null;
   userAttributes: Record<string, string> | null;
   userGroups: string[];
+  driverId: number | null;
   hasRole: (role: string) => boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => void;
@@ -28,6 +29,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<CognitoUser | null>(null);
   const [userAttributes, setUserAttributes] = useState<Record<string, string> | null>(null);
   const [userGroups, setUserGroups] = useState<string[]>([]);
+  const [driverId, setDriverId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Helper function to extract groups from session
@@ -35,6 +37,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const idToken = session.getIdToken();
     const payload = idToken.payload;
     return payload['cognito:groups'] || [];
+  };
+
+  // Fetch driver DB ID from backend using Cognito sub
+  const fetchDriverId = async (cognitoSub: string) => {
+    try {
+      const apiUrl = 'https://rl4ynabhzk.execute-api.me-central-1.amazonaws.com';
+      const response = await fetch(`${apiUrl}/drivers?user_id=${cognitoSub}`);
+      if (response.ok) {
+        const drivers = await response.json();
+        if (drivers && drivers.length > 0) {
+          setDriverId(drivers[0].id);
+          console.log('[AuthContext] Driver ID fetched:', drivers[0].id);
+        }
+      }
+    } catch (err) {
+      console.error('[AuthContext] Error fetching driver ID:', err);
+    }
   };
 
   // Check if user is already authenticated on mount
@@ -63,6 +82,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 attrs[attr.Name] = attr.Value;
               });
               setUserAttributes(attrs);
+
+              // Fetch driver ID if user is in Driver group
+              const groups = extractGroups(session);
+              if (groups.includes('Driver') && attrs['sub']) {
+                fetchDriverId(attrs['sub']);
+              }
             }
             setIsLoading(false);
           });
@@ -109,6 +134,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 attrs[attr.Name] = attr.Value;
               });
               setUserAttributes(attrs);
+
+              // Fetch driver ID if user is in Driver group
+              const groups = extractGroups(session);
+              if (groups.includes('Driver') && attrs['sub']) {
+                fetchDriverId(attrs['sub']);
+              }
             }
             setIsLoading(false);
             resolve();
@@ -140,6 +171,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
     setUserAttributes(null);
     setUserGroups([]);
+    setDriverId(null);
     setIsAuthenticated(false);
     setError(null);
   };
@@ -155,6 +187,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     user,
     userAttributes,
     userGroups,
+    driverId,
     hasRole,
     signIn,
     signOut,
