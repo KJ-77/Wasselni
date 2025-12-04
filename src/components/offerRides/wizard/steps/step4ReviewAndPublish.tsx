@@ -33,6 +33,20 @@ export default function Step4ReviewAndPublish({ data, setData, vehicles }: Props
     }
   }
 
+  const formatDuration = (seconds?: number) => {
+    if (!seconds) return "N/A";
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${minutes}m`;
+  };
+
+  const formatDistance = (distance?: number) => {
+    if (!distance) return "N/A";
+    if (distance > 1000) return `${(distance / 1000).toFixed(1)} km`;
+    return `${distance.toFixed(0)} m`;
+  };
+
   return (
     <Card>
         <CardHeader>
@@ -78,8 +92,21 @@ export default function Step4ReviewAndPublish({ data, setData, vehicles }: Props
                                         <div className="text-sm font-medium">{getPreviewDate()}</div>
                                     </div>
                                 </div>
-                                <div className="flex items-center justify-center">
-                                    <Badge variant="outline">{vehicleAndPricing.availableSeats || 0} seats available</Badge>
+                                <div className="flex items-center justify-center gap-3">
+                                    {routeDetails.selectedRoute && (
+                                      <>
+                                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                                          📏 {formatDistance(routeDetails.selectedRoute.distance)}
+                                        </Badge>
+                                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                          ⏱️ {formatDuration(routeDetails.selectedRoute.duration)}
+                                        </Badge>
+                                        <Badge variant="outline">{vehicleAndPricing.availableSeats || 0} seats</Badge>
+                                      </>
+                                    )}
+                                    {!routeDetails.selectedRoute && (
+                                      <Badge variant="outline">{vehicleAndPricing.availableSeats || 0} seats available</Badge>
+                                    )}
                                 </div>
                                 <div>
                                     <div className="font-medium">{routeDetails.arrivalCity || "Arrival"}</div>

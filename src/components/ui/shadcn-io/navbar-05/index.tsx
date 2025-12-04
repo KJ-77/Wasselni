@@ -379,13 +379,17 @@ export const Navbar05 = React.forwardRef<HTMLElement, Navbar05Props>(
                     {navigationLinks.map((link, index) => (
                       <NavigationMenuItem key={index}>
                         <NavigationMenuLink asChild>
-                          <Link
-                            to={link.href || "/"}
-                            onClick={() => onNavItemClick?.(link.href || "")}
+                          <a
+                            href={link.href || "/"}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              onNavItemClick?.(link.href || "");
+                              window.location.hash = link.href || "/";
+                            }}
                             className="text-muted-foreground hover:text-primary font-medium transition-colors cursor-pointer group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50"
                           >
                             {link.label}
-                          </Link>
+                          </a>
                         </NavigationMenuLink>
                       </NavigationMenuItem>
                     ))}

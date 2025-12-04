@@ -1,13 +1,15 @@
-import { WizardData, Stop } from "./types";
+import { WizardData, Stop, SelectedRoute } from "./types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, X, MapPin, Trash2 } from "lucide-react";
+import { Plus, X, MapPin, Trash2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { AddressAutocomplete } from "@/components/AddressAutocomplete";
 import MapboxMap from "@/components/map";
-import { AutocompleteResponse } from "@/services/MapService";
+import { AutocompleteResponse, fetchAvailableRoutes } from "@/services/MapService";
+import { useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface Props {
   data: WizardData;
@@ -16,29 +18,46 @@ interface Props {
 
 export default function Step1RouteDetails({ data, setData }: Props) {
   const { routeDetails } = data;
+  const [routeGeoJSON, setRouteGeoJSON] = useState<GeoJSON.FeatureCollection | null>(null);
+  const [selectedRouteId, setSelectedRouteId] = useState<string | null>(null);
 
-  const handlePlaceSelect = (field: "departure" | "arrival", place: AutocompleteResponse) => {
+  const handlePlaceSelect = async (field: "departure" | "arrival", place: AutocompleteResponse) => {
     const city = place.address;
     const coordinates = { lat: place.lat, lng: place.lng };
 
-    if (field === "departure") {
-      setData({
-        ...data,
-        routeDetails: {
-          ...routeDetails,
-          departureCity: city,
-          departureCoordinates: coordinates,
-        },
-      });
-    } else {
-      setData({
-        ...data,
-        routeDetails: {
-          ...routeDetails,
-          arrivalCity: city,
-          arrivalCoordinates: coordinates,
-        },
-      });
+    const updatedRouteDetails = {
+      ...routeDetails,
+      [field === "departure" ? "departureCity" : "arrivalCity"]: city,
+      [field === "departure" ? "departureCoordinates" : "arrivalCoordinates"]: coordinates,
+    };
+
+    setData({
+      ...data,
+      routeDetails: updatedRouteDetails,
+    });
+
+    // Fetch and display routes if both coordinates are available
+    if (updatedRouteDetails.departureCoordinates && updatedRouteDetails.arrivalCoordinates) {
+      try {
+        const routes = await fetchAvailableRoutes(
+          updatedRouteDetails.departureCoordinates,
+          updatedRouteDetails.arrivalCoordinates
+        );
+
+        if (routes) {
+          setRouteGeoJSON(routes);
+          // Reset selected route when new locations are chosen
+          setSelectedRouteId(null);
+          setData({
+            ...data,
+            routeDetails: { ...updatedRouteDetails, selectedRoute: undefined },
+          });
+        } else {
+          console.error("No routes found.");
+        }
+      } catch (error) {
+        console.error("Error fetching routes:", error);
+      }
     }
   };
 
@@ -97,20 +116,40 @@ export default function Step1RouteDetails({ data, setData }: Props) {
     });
   };
 
-
   const handleStopPlaceSelect = (id: number, place: AutocompleteResponse) => {
     const updatedStops = (routeDetails.stops || []).map((stop) =>
-      stop.id === id 
-        ? { 
-            ...stop, 
+      stop.id === id
+        ? {
+            ...stop,
             location: place.address,
             coordinates: { lat: place.lat, lng: place.lng }
-          } 
+          }
         : stop
     );
     setData({
       ...data,
       routeDetails: { ...routeDetails, stops: updatedStops },
+    });
+  };
+
+  const handleRouteSelect = (selectedFeature: any) => {
+    const selectedRoute: SelectedRoute = {
+      id: selectedFeature.id?.toString(),
+      geometry: selectedFeature.geometry,
+      distance: selectedFeature.properties?.distance,
+      duration: selectedFeature.properties?.duration,
+      polyline: selectedFeature.properties?.polyline,
+      estimatedArrival: selectedFeature.properties?.estimatedArrival,
+      properties: selectedFeature.properties,
+    };
+
+    setSelectedRouteId(selectedRoute.id || "0");
+    setData({
+      ...data,
+      routeDetails: {
+        ...routeDetails,
+        selectedRoute,
+      },
     });
   };
 
@@ -121,8 +160,25 @@ export default function Step1RouteDetails({ data, setData }: Props) {
         ...routeDetails,
         departureCoordinates: undefined,
         arrivalCoordinates: undefined,
+        selectedRoute: undefined,
       },
     });
+    setRouteGeoJSON(null);
+    setSelectedRouteId(null);
+  };
+
+  const formatDuration = (seconds?: number) => {
+    if (!seconds) return "N/A";
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${minutes}m`;
+  };
+
+  const formatDistance = (distance?: number) => {
+    if (!distance) return "N/A";
+    if (distance > 1000) return `${(distance / 1000).toFixed(1)} km`;
+    return `${distance.toFixed(0)} m`;
   };
 
   return (
@@ -167,25 +223,25 @@ export default function Step1RouteDetails({ data, setData }: Props) {
             />
           </div>
         </div>
-        
+
         {/* Date & Time */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="departureDate">Departure Date *</Label>
-            <Input 
-              id="departureDate" 
-              type="date" 
-              value={routeDetails.departureDate || ""} 
-              onChange={(e) => updateField("departureDate", e.target.value)} 
+            <Input
+              id="departureDate"
+              type="date"
+              value={routeDetails.departureDate || ""}
+              onChange={(e) => updateField("departureDate", e.target.value)}
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="departureTime">Departure Time *</Label>
-            <Input 
-              id="departureTime" 
-              type="time" 
-              value={routeDetails.departureTime || ""} 
-              onChange={(e) => updateField("departureTime", e.target.value)} 
+            <Input
+              id="departureTime"
+              type="time"
+              value={routeDetails.departureTime || ""}
+              onChange={(e) => updateField("departureTime", e.target.value)}
             />
           </div>
         </div>
@@ -197,9 +253,9 @@ export default function Step1RouteDetails({ data, setData }: Props) {
                     <h4 className="font-medium">Round Trip</h4>
                     <p className="text-sm text-muted-foreground">Offer a return journey</p>
                 </div>
-                <Checkbox 
-                  checked={routeDetails.isRoundTrip || false} 
-                  onCheckedChange={(checked: boolean) => updateField("isRoundTrip", checked)} 
+                <Checkbox
+                  checked={routeDetails.isRoundTrip || false}
+                  onCheckedChange={(checked: boolean) => updateField("isRoundTrip", checked)}
                 />
             </div>
         </Card>
@@ -210,20 +266,20 @@ export default function Step1RouteDetails({ data, setData }: Props) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                         <Label htmlFor="returnDate">Return Date *</Label>
-                        <Input 
-                          id="returnDate" 
-                          type="date" 
-                          value={routeDetails.returnDate || ""} 
-                          onChange={(e) => updateField("returnDate", e.target.value)} 
+                        <Input
+                          id="returnDate"
+                          type="date"
+                          value={routeDetails.returnDate || ""}
+                          onChange={(e) => updateField("returnDate", e.target.value)}
                         />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="returnTime">Return Time *</Label>
-                        <Input 
-                          id="returnTime" 
-                          type="time" 
-                          value={routeDetails.returnTime || ""} 
-                          onChange={(e) => updateField("returnTime", e.target.value)} 
+                        <Input
+                          id="returnTime"
+                          type="time"
+                          value={routeDetails.returnTime || ""}
+                          onChange={(e) => updateField("returnTime", e.target.value)}
                         />
                     </div>
                 </div>
@@ -249,19 +305,19 @@ export default function Step1RouteDetails({ data, setData }: Props) {
               </div>
             ))}
           </div>
-          <Button 
-            type="button" 
-            variant="outline" 
-            size="sm" 
-            className="mt-3" 
-            onClick={handleAddStop} 
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="mt-3"
+            onClick={handleAddStop}
             disabled={(routeDetails.stops?.length || 0) >= 3}
           >
             <Plus className="w-4 h-4 mr-2" /> Add Stop
           </Button>
         </div>
 
-        {/* Map Section */}
+        {/* Map Section with Route Selection */}
         <Card className="bg-gradient-to-br from-blue-50 to-green-50">
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -270,7 +326,7 @@ export default function Step1RouteDetails({ data, setData }: Props) {
                       <MapPin className="w-5 h-5 mr-2 text-blue-600" /> Set Your Route on Map
                     </CardTitle>
                     <CardDescription className="mt-1">
-                      Select your departure and arrival locations above to see the route on the map.
+                      Select your departure and arrival locations above, then click on a route to select it.
                     </CardDescription>
                 </div>
                 <Button type="button" variant="outline" size="sm" onClick={clearMap}>
@@ -278,12 +334,37 @@ export default function Step1RouteDetails({ data, setData }: Props) {
                 </Button>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <MapboxMap
               origin={routeDetails.departureCoordinates}
               destination={routeDetails.arrivalCoordinates}
+              routes={routeGeoJSON}
+              selectedRouteId={selectedRouteId || undefined}
+              onRouteSelect={handleRouteSelect}
               className="h-[400px] w-full rounded-md"
             />
+
+            {/* Route Selection Status */}
+            {routeGeoJSON && !routeDetails.selectedRoute && (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Click on a route on the map to select it for your ride offer.
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {routeDetails.selectedRoute && (
+              <Alert className="border-green-600 bg-green-50">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <AlertDescription className="text-green-800">
+                  <div className="font-semibold">Route Selected ✓</div>
+                  <div className="text-sm mt-1">
+                    Distance: {formatDistance(routeDetails.selectedRoute.distance)} • Duration: {formatDuration(routeDetails.selectedRoute.duration)}
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
           </CardContent>
         </Card>
       </CardContent>

@@ -1,8 +1,52 @@
 // src/services/MapService.ts
 
-// Backend API endpoint base URL
-// Uses AWS backend directly (no local proxy needed)
-const BASE_URL = "https://rl4ynabhzk.execute-api.me-central-1.amazonaws.com";
+import apiClient from './ApiClient';
+
+/**
+ * Decode polyline6 encoded string to [lng, lat] coordinates
+ * Polyline6 uses a precision factor of 1e6 instead of 1e5
+ * Reference: https://github.com/mapbox/polyline/blob/master/src/polyline.js
+ */
+function decodePolyline6(encoded: string): [number, number][] {
+  const precision = 1e6;
+  const coordinates: [number, number][] = [];
+  let index = 0;
+  let lat = 0;
+  let lng = 0;
+
+  while (index < encoded.length) {
+    let result = 0;
+    let shift = 0;
+    let byte: number;
+
+    // Decode latitude
+    do {
+      byte = encoded.charCodeAt(index++) - 63;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20);
+
+    const latDelta = result & 1 ? ~(result >> 1) : result >> 1;
+    lat += latDelta;
+
+    result = 0;
+    shift = 0;
+
+    // Decode longitude
+    do {
+      byte = encoded.charCodeAt(index++) - 63;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20);
+
+    const lngDelta = result & 1 ? ~(result >> 1) : result >> 1;
+    lng += lngDelta;
+
+    coordinates.push([lng / precision, lat / precision]);
+  }
+
+  return coordinates;
+}
 
 interface FetchDirectionsParams {
   origin: { lat: number; lng: number };
@@ -11,19 +55,17 @@ interface FetchDirectionsParams {
 }
 
 export const fetchDirections = async (params: FetchDirectionsParams) => {
-  const response = await fetch(`${BASE_URL}/directions`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+  const directionResponse = await apiClient.getDirections({
+    origin: {
+      lat: params.origin.lat,
+      lng: params.origin.lng,
     },
-    body: JSON.stringify(params),
+    destination: {
+      lat: params.destination.lat,
+      lng: params.destination.lng,
+    },
   });
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch directions");
-  }
-
-  return response.json();
+  return directionResponse;
 };
 
 /**
@@ -55,73 +97,132 @@ export const fetchAutocompleteSuggestions = async (
   while (attempt < maxAttempts) {
     attempt++;
     try {
-      const response = await fetch(`${BASE_URL}/autocomplete?q=${encodeURIComponent(query)}`);
+      const response = await apiClient.autocomplete(query);
 
-      if (!response.ok) {
-        // Read response body for diagnostics if possible
-        let bodyText: string | undefined;
-        try {
-          bodyText = await response.text();
-        } catch (e) {
-          bodyText = undefined;
-        }
-        console.error(
-          `Autocomplete API error (attempt ${attempt}):`,
-          response.status,
-          response.statusText,
-          bodyText || "<no body>"
-        );
-
-        // If server error, try again (simple retry); client errors won't be retried
-        if (response.status >= 500 && attempt < maxAttempts) {
-          // small backoff
-          await new Promise((r) => setTimeout(r, 250 * attempt));
-          continue;
-        }
-
+      // Backend returns array directly OR wrapped in suggestions object
+      const suggestions = Array.isArray(response) ? response : response.suggestions;
+      
+      if (!Array.isArray(suggestions)) {
+        console.error("Autocomplete endpoint should return array, got:", typeof response, response);
         return [];
       }
 
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        const txt = await response.text().catch(() => "<unreadable>");
-        console.error(
-          "Autocomplete endpoint returned non-JSON response. Verify backend is configured correctly.",
-          { contentType, url: `${BASE_URL}/autocomplete?q=${query}`, body: txt }
-        );
-        return [];
-      }
+      console.log("[MapService] Raw suggestion sample:", suggestions[0]);
 
-      const data = await response.json();
-
-      if (!Array.isArray(data)) {
-        console.error("Autocomplete endpoint should return array, got:", typeof data, data);
-        return [];
-      }
-
-      const validSuggestions = data.filter(
-        (item): item is AutocompleteResponse =>
+      const validSuggestions = suggestions.filter(
+        (item: any): boolean =>
           item &&
           typeof item === "object" &&
-          typeof item.place_id === "string" &&
-          typeof item.address === "string" &&
-          typeof item.lat === "number" &&
-          typeof item.lng === "number"
+          ("place_name" in item || "address" in item) &&
+          (Array.isArray(item.center) || (item.lat && item.lng))
       );
 
-      if (validSuggestions.length === 0 && data.length > 0) {
-        console.warn("Backend returned suggestions but none matched expected format. Sample:", data[0]);
-      }
-
-      return validSuggestions;
+      console.log(`[MapService] Autocomplete "${query}" returned ${validSuggestions.length} suggestions`);
+      return validSuggestions.map((s: any) => ({
+        place_id: s.place_name || s.address || s.id,
+        address: s.place_name || s.address,
+        lat: s.center ? s.center[1] : s.lat,
+        lng: s.center ? s.center[0] : s.lng,
+      }));
     } catch (error) {
-      console.error(`Autocomplete fetch exception (attempt ${attempt}):`, error);
+      console.error(
+        `Autocomplete API error (attempt ${attempt}):`,
+        error instanceof Error ? error.message : "Unknown error"
+      );
+
+      // If server error, try again (simple retry)
       if (attempt < maxAttempts) {
         await new Promise((r) => setTimeout(r, 250 * attempt));
         continue;
       }
+
       return [];
     }
   }
+
   return [];
+};
+
+/**
+ * Backend response from /routes endpoint
+ * Returns array of route alternatives with polyline6 encoded geometry
+ */
+interface RouteAlternative {
+  overview_polyline: string; // polyline6 encoded string
+  distance_meters: number;
+  duration_seconds: number;
+}
+
+/**
+ * Transform backend route alternatives to GeoJSON FeatureCollection
+ * @param alternatives - Array of route alternatives from backend
+ * @returns GeoJSON FeatureCollection with decoded geometries
+ */
+export function transformRoutesToGeoJSON(alternatives: RouteAlternative[]): GeoJSON.FeatureCollection {
+  const features: GeoJSON.Feature[] = alternatives.map((route, index) => {
+    // Decode polyline6 to coordinates
+    const coordinates = decodePolyline6(route.overview_polyline);
+
+    return {
+      type: "Feature",
+      id: index,
+      geometry: {
+        type: "LineString",
+        coordinates: coordinates,
+      },
+      properties: {
+        id: index,
+        distance: route.distance_meters,
+        duration: route.duration_seconds,
+        polyline: route.overview_polyline,
+        routeName: `Route ${index + 1}`,
+      },
+    };
+  });
+
+  return {
+    type: "FeatureCollection",
+    features: features,
+  };
+}
+
+/**
+ * Fetch available routes based on departure and arrival coordinates.
+ * @param departure - Departure coordinates { lat, lng }.
+ * @param arrival - Arrival coordinates { lat, lng }.
+ * @returns GeoJSON FeatureCollection with route alternatives.
+ */
+export const fetchAvailableRoutes = async (
+  departure: { lat: number; lng: number },
+  arrival: { lat: number; lng: number }
+): Promise<GeoJSON.FeatureCollection | null> => {
+  try {
+    console.log("[MapService] Fetching routes from", { departure, arrival });
+    
+    const response = await apiClient.getDirections({
+      origin: {
+        lat: departure.lat,
+        lng: departure.lng,
+      },
+      destination: {
+        lat: arrival.lat,
+        lng: arrival.lng,
+      },
+    });
+
+    console.log("[MapService] Raw routes response:", response);
+
+    // Transform route alternatives to GeoJSON
+    if (Array.isArray(response.alternatives)) {
+      const transformed = transformRoutesToGeoJSON(response.alternatives);
+      console.log("[MapService] Transformed routes to GeoJSON:", transformed);
+      return transformed;
+    }
+
+    console.error("[MapService] Unexpected routes response format:", response);
+    return null;
+  } catch (error) {
+    console.error("[MapService] Error fetching routes:", error);
+    return null;
+  }
 };

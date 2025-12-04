@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import AddVehicleModal from "../AddVehicleModal";
+import { transformToFlatPayload } from "@/services/RideDataService";
+import apiClient from "@/services/ApiClient";
 
 export default function Wizard() {
   const navigate = useNavigate();
@@ -186,18 +188,23 @@ export default function Wizard() {
     }
     setLoading(true);
     try {
-      const res = await fetch(`/api/dashboard/profile/rides`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error("Failed to save ride");
-      const body = await res.json();
+      // Get the selected vehicle
+      const selectedVehicle = vehicles.find(v => v.id === data.vehicleAndPricing.selectedVehicleId);
+      if (!selectedVehicle) {
+        throw new Error("Selected vehicle not found");
+      }
+
+      // Transform WizardData to backend API format
+      const payload = transformToFlatPayload(data, "user_id_placeholder", selectedVehicle);
+      console.log("[Wizard] Submitting ride payload:", payload);
+
+      // Use ApiClient to submit ride (cast to Ride type since transformation handles mapping)
+      await apiClient.createRide(payload as any);
+
       toast({
         title: "Ride Published!",
         description: "Your ride is now visible to passengers.",
       });
-      console.log("Ride created:", body);
       setTimeout(() => {
         navigate("/rides");
       }, 1000);

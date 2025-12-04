@@ -5,6 +5,20 @@ export interface Stop {
   coordinates?: { lat: number; lng: number };
 }
 
+// Represents a selected route with metadata
+export interface SelectedRoute {
+  id?: string;
+  geometry: {
+    type: "LineString";
+    coordinates: [number, number][]; // [lng, lat] pairs
+  };
+  distance?: number; // Distance in meters or km
+  duration?: number; // Duration in seconds
+  polyline?: string; // Encoded polyline
+  estimatedArrival?: string; // ISO timestamp
+  properties?: Record<string, any>; // Additional metadata
+}
+
 // Step 1: Route Details
 export interface RouteDetails {
   departureCity: string;
@@ -19,6 +33,7 @@ export interface RouteDetails {
   returnDate: string;
   returnTime: string;
   stops: Stop[];
+  selectedRoute?: SelectedRoute; // The user's selected route
 }
 
 // Represents a user's registered vehicle
